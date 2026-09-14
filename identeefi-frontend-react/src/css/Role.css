@@ -1,0 +1,110 @@
+.role-container {
+    background: url('../img/herobg.png') center center/cover no-repeat;
+    background-color: rgb(39, 50, 98);
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
+    object-fit: contain;
+}
+
+.role-container-box {
+    width: 90%;
+    max-width: 400px;
+    height: 80vh;
+    max-height: 500px;
+    background-color: #161232c4;
+    padding: 20px;
+    border-radius: 2%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.role-container-top {
+    margin-top: 10%;
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    max-height: 500px;
+    background-color: #e3eefc;
+    padding: 20px;
+    border-radius: 2%;
+    display: table;
+    align-items: center;
+    flex-direction: column;
+}
+
+.role-container-box>h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-family: 'Gambetta', serif;
+    letter-spacing: -1px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.role-container-box>h2 {
+    color: #ffffff;
+    font-family: 'Gambetta', serif;
+    font-weight: lighter;
+    letter-spacing: 0.5px;
+    font-size: 1.125rem;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.role-container-top>h1 {
+    color: #193453;
+    font-size: 2.5rem;
+    font-family: 'Gambetta', serif;
+    letter-spacing: -1px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form.role {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure buttons are styled correctly */
+.btns {
+    margin: 20px 0;
+    width: 100%;
+    max-width: 300px;
+    padding: 15px 20px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .role-container-box {
+        width: 95%;
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .btns {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 0.875rem;
+    }
+
+    .role-container-box>h1, .role-container-top>h1 {
+        font-size: 2rem;
+    }
+
+    .role-container-box>h2 {
+        font-size: 1rem;
+    }
+}
