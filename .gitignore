@@ -1,0 +1,22 @@
+node_modules/
+**/node_modules/
+
+# Hardhat generated files
+proofmark-contracts/artifacts/
+proofmark-contracts/cache/
+proofmark-contracts/typechain/
+proofmark-contracts/typechain-types/
+
+# Frontend build output
+proofmark-frontend/build/
+proofmark-frontend/coverage/
+
+# Environment and local deployment files
+*.env
+!.env.example
+proofmark-contracts/contractDeployment.json
+
+# Tooling and logs
+npm-debug.log*
+yarn-debug.log*
+.DS_Store

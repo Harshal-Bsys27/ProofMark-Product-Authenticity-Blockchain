@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --ink: #17221f;
+  --ink-soft: #50605a;
+  --paper: #f4f6f0;
+  --white: #ffffff;
+  --line: #d9e0d8;
+  --mint: #b7f397;
+  --mint-deep: #76c65d;
+  --teal: #0e766e;
+  --teal-dark: #0a3d3b;
+  --coral: #f47c5a;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Manrope', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body { margin: 0; min-width: 320px; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--mint); color: var(--ink); }
+
+.App { min-height: 100vh; }
+.app-frame { min-height: 100vh; overflow: hidden; background: var(--paper); }
+.site-header { width: min(1280px, calc(100% - 64px)); min-height: 92px; margin: 0 auto; display: flex; align-items: center; gap: 42px; border-bottom: 1px solid var(--line); position: relative; z-index: 5; }
+.brand { display: inline-flex; align-items: center; gap: 11px; min-width: 190px; }
+.brand-mark { width: 35px; height: 35px; display: grid; place-items: center; background: var(--ink); color: var(--mint); font-family: var(--mono); font-size: 12px; font-weight: 500; transform: rotate(-8deg); }
+.brand strong { display: block; font-size: 17px; letter-spacing: -0.06em; line-height: 1; }
+.brand strong span { color: var(--teal); }
+.brand small { display: block; margin-top: 5px; color: var(--ink-soft); font-family: var(--mono); font-size: 8px; letter-spacing: .1em; }
+.site-nav { display: flex; align-items: center; gap: 28px; margin-right: auto; }
+.site-nav a { color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; transition: color .2s ease; }
+.site-nav a:hover, .site-nav a.active { color: var(--teal); }
+.site-nav a.active::after { content: ''; display: block; width: 5px; height: 5px; margin: 7px auto 0; border-radius: 50%; background: var(--coral); }
+.header-actions { display: flex; align-items: center; gap: 18px; }
+.network-status { color: var(--ink-soft); font-family: var(--mono); font-size: 10px; white-space: nowrap; }
+.network-status i, .wallet-chip i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--mint-deep); box-shadow: 0 0 0 4px rgba(118,198,93,.14); }
+.connect-button, .wallet-chip { border: 1px solid var(--ink); background: var(--ink); color: var(--white); padding: 11px 15px; cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: .04em; }
+.wallet-chip { background: transparent; color: var(--ink); border-color: var(--line); }
+.menu-toggle { display: none; border: 0; background: transparent; padding: 10px 0; cursor: pointer; }
+.menu-toggle span { display: block; width: 24px; height: 1px; margin: 5px; background: var(--ink); }
+.page-context { width: min(1280px, calc(100% - 64px)); margin: 0 auto; padding: 17px 0; display: flex; align-items: center; gap: 12px; color: #89948d; font-family: var(--mono); font-size: 9px; letter-spacing: .11em; }
+.context-line { width: 30px; height: 1px; background: var(--line); }
+.site-footer { width: min(1280px, calc(100% - 64px)); margin: 70px auto 0; padding: 22px 0 28px; display: flex; justify-content: space-between; border-top: 1px solid var(--line); color: #89948d; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; }
+
+@media (max-width: 800px) {
+  .site-header, .page-context, .site-footer { width: min(100% - 32px, 620px); }
+  .site-header { min-height: 76px; gap: 0; justify-content: space-between; }
+  .menu-toggle { display: block; order: 2; }
+  .header-actions { order: 3; }
+  .network-status { display: none; }
+  .site-nav { position: absolute; top: 76px; left: 0; right: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; padding: 10px 0; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .site-nav.is-open { display: flex; }
+  .site-nav a { padding: 14px 0; }
+  .site-nav a.active::after { display: none; }
+  .brand { min-width: auto; }
+  .connect-button, .wallet-chip { padding: 9px 10px; font-size: 9px; }
+  .page-context { font-size: 8px; }
+  .site-footer { flex-direction: column; gap: 8px; font-size: 8px; }
+}

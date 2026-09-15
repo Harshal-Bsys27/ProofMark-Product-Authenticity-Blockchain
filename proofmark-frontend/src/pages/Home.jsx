@@ -1,0 +1,67 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import '../css/pages.css';
+
+function Home({ isConnected }) {
+  return (
+    <main className="home-page">
+      <section className="home-hero">
+        <div className="hero-copy">
+          <p className="eyebrow"><span /> TRUSTED PRODUCT IDENTITY</p>
+          <h1>Know what you are holding.</h1>
+          <p className="hero-lede">
+            A clear, tamper-resistant record for every product. Register provenance on-chain,
+            then verify it in seconds with the original product details.
+          </p>
+          <div className="hero-actions">
+            <Link className="button button-primary" to="/verify">Verify a product <span>↗</span></Link>
+            <Link className="button button-quiet" to="/register">Register inventory</Link>
+          </div>
+          <div className="hero-note">
+            <span className="signal-dot" />
+            {isConnected ? 'Manufacturer wallet connected' : 'Verification is open to everyone'}
+          </div>
+        </div>
+
+        <div className="hero-visual" aria-label="Blockchain verification status">
+          <div className="orbit orbit-large" />
+          <div className="orbit orbit-small" />
+          <div className="seal">
+            <span className="seal-caption">ON-CHAIN</span>
+            <strong>AUTHENTIC</strong>
+            <span className="seal-check">✓</span>
+          </div>
+          <div className="visual-card visual-card-top"><span>NETWORK</span><strong>HARDHAT / 1337</strong></div>
+          <div className="visual-card visual-card-bottom"><span>LAST VERIFIED</span><strong>BLOCK #004</strong></div>
+        </div>
+      </section>
+
+      <section className="metric-strip">
+        <div><strong>01</strong><span>Register once</span></div>
+        <div><strong>02</strong><span>Hash the details</span></div>
+        <div><strong>03</strong><span>Verify anywhere</span></div>
+        <div className="metric-wide"><strong>SHA-256</strong><span>Every product receives a unique digital fingerprint</span></div>
+      </section>
+
+      <section className="home-section home-grid">
+        <div>
+          <p className="eyebrow">THE LEDGER MODEL</p>
+          <h2>Proof that stays put.</h2>
+          <p className="section-lede">ProofMark turns ordinary product details into a verifiable record. The hash is the fingerprint; the smart contract is the witness.</p>
+        </div>
+        <div className="principle-list">
+          <article><span>01</span><div><h3>Traceable</h3><p>See who registered a product and when it entered the ledger.</p></div></article>
+          <article><span>02</span><div><h3>Unaltered</h3><p>A changed ID, name, or batch creates a completely different hash.</p></div></article>
+          <article><span>03</span><div><h3>Accessible</h3><p>Verification is a free, read-only check. No wallet required.</p></div></article>
+        </div>
+      </section>
+
+      <section className="action-band">
+        <div><p className="eyebrow">READY WHEN YOU ARE</p><h2>Make authenticity part of the handoff.</h2></div>
+        <Link className="button button-light" to="/verify">Open verifier <span>→</span></Link>
+      </section>
+    </main>
+  );
+}
+
+export default Home;
