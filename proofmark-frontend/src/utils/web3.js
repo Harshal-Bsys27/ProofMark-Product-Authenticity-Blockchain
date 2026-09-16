@@ -246,6 +246,46 @@ export const getBlockchainDetails = async () => {
   }
 };
 
+export const getTransactionDetails = async (transactionHash) => {
+  const provider = getProvider();
+  const normalizedHash = transactionHash.trim();
+
+  if (!ethers.utils.isHexString(normalizedHash, 32)) {
+    throw new Error('Enter a valid 66-character transaction hash beginning with 0x.');
+  }
+
+  const transaction = await provider.getTransaction(normalizedHash);
+  if (!transaction) {
+    throw new Error('Transaction was not found on the connected local network.');
+  }
+
+  const receipt = await provider.getTransactionReceipt(normalizedHash);
+  if (!receipt) {
+    return {
+      hash: transaction.hash,
+      from: transaction.from,
+      to: transaction.to,
+      value: ethers.utils.formatEther(transaction.value),
+      blockNumber: null,
+      status: 'Pending',
+      gasUsed: null,
+      timestamp: null,
+    };
+  }
+
+  const block = await provider.getBlock(receipt.blockNumber);
+  return {
+    hash: transaction.hash,
+    from: transaction.from,
+    to: transaction.to,
+    value: ethers.utils.formatEther(transaction.value),
+    blockNumber: receipt.blockNumber,
+    status: receipt.status === 1 ? 'Confirmed' : 'Failed',
+    gasUsed: receipt.gasUsed.toString(),
+    timestamp: block ? block.timestamp : null,
+  };
+};
+
 /**
  * Connect to MetaMask wallet
  * 
@@ -407,6 +447,7 @@ const web3Utils = {
   registerProductOnBlockchain,
   verifyProductOnBlockchain,
   getBlockchainDetails,
+  getTransactionDetails,
   connectWallet,
   checkWalletConnection,
   onAccountChange,

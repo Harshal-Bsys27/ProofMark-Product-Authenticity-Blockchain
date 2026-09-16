@@ -27,6 +27,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "setup-demo": "hardhat run scripts/setup-demo.js --network localhost",
     "authorize": "hardhat run scripts/authorize.js --network localhost",
     "fund": "hardhat run scripts/fund-account.js --network localhost",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
