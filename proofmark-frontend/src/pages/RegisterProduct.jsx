@@ -71,6 +71,13 @@ function RegisterProduct({ account, isConnected }) {
 
       if (result.success) {
         setTransactionDetails(result.details);
+        localStorage.setItem('proofmark-latest-registration', JSON.stringify({
+          ...result.details,
+          productId: formData.productId,
+          productName: formData.productName,
+          batchNumber: formData.batchNumber,
+          productHash,
+        }));
         setMessage('✅ Product registered successfully!');
         
         // Reset form
@@ -263,43 +270,44 @@ function RegisterProduct({ account, isConnected }) {
 
         {/* Technical Info */}
         <section className="tech-info">
-          <h2>💡 What Gets Stored?</h2>
-          <div className="storage-info">
-            <h4>On Blockchain:</h4>
-            <ul>
-              <li>Product Hash (SHA-256)</li>
-              <li>Product ID</li>
-              <li>Product Name</li>
-              <li>Batch Number</li>
-              <li>Manufacturer Address</li>
-              <li>Registration Timestamp</li>
-              <li>Active Status</li>
-            </ul>
-
-            <h4>Not Stored (Cost Optimization):</h4>
-            <ul>
-              <li>Product images</li>
-              <li>Detailed descriptions</li>
-              <li>Pricing information</li>
-              <li>Personal data</li>
-            </ul>
-
-            <p className="storage-note">
-              Only essential data is stored on blockchain to minimize gas costs
-              while maintaining authenticity verification.
-            </p>
+          <div className="section-title-row"><span className="info-kicker">DATA MODEL</span><h2>What gets stored?</h2></div>
+          <p className="section-intro">The ledger keeps only the fields needed to reproduce and verify a product fingerprint.</p>
+          <div className="storage-grid">
+            <div className="storage-column storage-onchain">
+              <div className="storage-heading"><span className="storage-badge">ON-CHAIN</span><strong>Verification record</strong></div>
+              <ul>
+                <li>Product hash <small>SHA-256 fingerprint</small></li>
+                <li>Product ID <small>SKU or serial reference</small></li>
+                <li>Product name <small>Registered product label</small></li>
+                <li>Batch number <small>Manufacturing reference</small></li>
+                <li>Manufacturer address <small>Wallet that registered it</small></li>
+                <li>Registration timestamp <small>When the record was created</small></li>
+                <li>Active status <small>Current product state</small></li>
+              </ul>
+            </div>
+            <div className="storage-column storage-offchain">
+              <div className="storage-heading"><span className="storage-badge">OFF-CHAIN</span><strong>Kept outside the ledger</strong></div>
+              <ul>
+                <li>Product images <small>Media remains lightweight</small></li>
+                <li>Detailed descriptions <small>Not needed for hash matching</small></li>
+                <li>Pricing information <small>Can change independently</small></li>
+                <li>Personal data <small>Minimizes sensitive data exposure</small></li>
+              </ul>
+            </div>
           </div>
+          <p className="storage-note"><strong>Cost-aware by design</strong><span>Only essential verification data is written on-chain, keeping gas use focused while preserving the authenticity check.</span></p>
         </section>
 
         {/* Security Note */}
         <section className="security-note">
-          <h2>🔒 Security Considerations</h2>
+          <div className="section-title-row"><span className="info-kicker">TRUST BOUNDARIES</span><h2>Security considerations</h2></div>
+          <p className="section-intro">Your wallet remains the signing boundary. ProofMark never receives your private key.</p>
           <ul className="security-list">
-            <li>Your private key is <strong>never</strong> sent to our servers</li>
-            <li>Transaction signing happens entirely in MetaMask</li>
-            <li>Once registered, data is immutable on blockchain</li>
-            <li>Only authorized manufacturers can register products</li>
-            <li>Hash generation is deterministic - same data produces same hash</li>
+            <li><span>01</span><div><strong>Private key stays in MetaMask</strong><p>It is never sent to ProofMark or stored by the application.</p></div></li>
+            <li><span>02</span><div><strong>You approve every write</strong><p>Transactions are signed in MetaMask before they reach the network.</p></div></li>
+            <li><span>03</span><div><strong>Records are immutable</strong><p>Once confirmed, a registration cannot be edited or quietly removed.</p></div></li>
+            <li><span>04</span><div><strong>Registration is permissioned</strong><p>Only authorized manufacturer wallets can create product records.</p></div></li>
+            <li><span>05</span><div><strong>Hashes are deterministic</strong><p>The same product details always produce the same fingerprint.</p></div></li>
           </ul>
         </section>
       </main>
