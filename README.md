@@ -1,7 +1,26 @@
-# AI-Assisted Product Authenticity Verification Using Blockchain
+# ProofMark: Product Authenticity Verification Using Blockchain
 
 **Blockchain Technology Mini-Project**  
 **Final-Year B.E. CSE (AIML) Student**
+
+ProofMark records essential product identity data on an Ethereum-compatible blockchain and lets anyone verify the same details through a read-only lookup.
+
+## Documentation
+
+- [Architecture and workflow](ARCHITECTURE_AND_WORKFLOW.md)
+- [Demo runbook](DEMO_RUNBOOK.md)
+- [Viva quick guide](VIVA_QUICK_GUIDE.md)
+- [Detailed startup guide](STARTUP_GUIDE.md)
+
+## Fastest Start
+
+Import Hardhat Account #0 into MetaMask once, then run this from the project root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
+```
+
+The launcher starts Hardhat, deploys the contract, and starts the frontend with a funded and authorized local demo account.
 
 ---
 
@@ -56,10 +75,10 @@ Build a **blockchain-based product authenticity verification system** that:
 ### Core Technology Stack
 
 **Blockchain:** Hardhat + Solidity Smart Contracts  
-**Frontend:** React + Vite + ethers.js  
+**Frontend:** React + CRACO + ethers.js  
 **Wallet:** MetaMask  
 **Hashing:** SHA-256  
-**Optional AI:** EasyOCR (Python)
+**Optional AI:** Not required for the current working flow
 
 ### Verification Flow
 
@@ -104,7 +123,7 @@ VERIFY:   Product Data → Same SHA-256 Hash → Blockchain Lookup → Result
 | **Dev Environment** | Hardhat 2.14+ | Local blockchain & testing |
 | **Web3 Interaction** | ethers.js 5.7+ | Connect to blockchain |
 | **Frontend** | React 18.2+  | User interface |
-| **Build Tool** | Vite | Fast development server |
+| **Build Tool** | Create React App + CRACO | Frontend development and production build |
 | **Wallet** | MetaMask | Transaction signing |
 | **UI Components** | Material-UI 5.11+ | Professional styling |
 | **Testing** | Mocha + Chai | Smart contract tests |
@@ -166,7 +185,7 @@ authorizeManufacturer(address manufacturer)
 ```
 product-authenticity-blockchain/
 ├── contracts/
-│   └── ProductAuthenticity.sol         # Main smart contract (~450 lines)
+│   └── ProductAuthenticity.sol         # Main smart contract
 ├── scripts/
 │   └── deploy.js                       # Deployment script
 ├── test/
@@ -178,8 +197,8 @@ product-authenticity-blockchain/
 │   │   ├── utils/                      # Web3 & hashing utilities
 │   │   └── App.jsx
 │   └── package.json
-├── hardhat.config.js                   # Hardhat configuration
-├── package.json                        # Root dependencies
+├── proofmark-contracts/                # Hardhat and Solidity layer
+├── proofmark-frontend/                 # React application
 ├── .env.example                        # Environment template
 ├── README.md                           # This file
 ├── VIVA_NOTES.md                       # Viva presentation guide
@@ -234,7 +253,7 @@ npm run compile
 **Terminal 1 - Start Blockchain:**
 ```bash
 cd proofmark-contracts
-npx hardhat node
+npm run node
 ```
 
 **Terminal 2 - Deploy Contract:**
@@ -247,12 +266,18 @@ npm run deploy
 **Terminal 3 - Start Frontend:**
 ```bash
 cd proofmark-frontend
-echo "REACT_APP_CONTRACT_ADDRESS=0x..." > .env
-# Replace 0x... with Contract Address from Terminal 2
 npm start
 ```
 
-Opens: http://localhost:5173/
+The frontend normally opens at `http://localhost:3000`. If that port is busy, use the URL printed by React.
+
+After a fresh Hardhat restart, authorize the MetaMask wallet used for registration:
+
+```powershell
+$env:MANUFACTURER_ADDRESS = "0xYOUR_WALLET_ADDRESS"
+npm run authorize
+Remove-Item Env:MANUFACTURER_ADDRESS
+```
 
 ---
 
@@ -288,6 +313,15 @@ Opens: http://localhost:5173/
 - Registration timestamp
 - Product hash
 - Contract address
+
+### MetaMask Network
+
+```text
+Network name: Hardhat Local
+RPC URL: http://127.0.0.1:8545
+Chain ID: 1337
+Currency: ETH
+```
 
 ---
 

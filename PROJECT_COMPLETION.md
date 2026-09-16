@@ -232,7 +232,7 @@ Removed (Clean Deletion):
 | **Testing** | Mocha + Chai | Latest |
 | **Frontend Framework** | React | 18.2+ |
 | **Web3 Library** | ethers.js | 5.7+ |
-| **Build Tool** | Vite | Latest |
+| **Build Tool** | Create React App + CRACO | Frontend development and production build |
 | **Wallet** | MetaMask | Browser ext |
 | **Hashing** | SHA-256 | crypto |
 
