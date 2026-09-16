@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../css/pages.css';
 
 function Home({ isConnected }) {
+  const [latestRecord, setLatestRecord] = useState(null);
+
+  useEffect(() => {
+    const savedRecord = localStorage.getItem('proofmark-latest-registration');
+    if (savedRecord) setLatestRecord(JSON.parse(savedRecord));
+  }, []);
+
   return (
     <main className="home-page">
       <section className="home-hero">
@@ -42,6 +49,8 @@ function Home({ isConnected }) {
         <div><strong>03</strong><span>Verify anywhere</span></div>
         <div className="metric-wide"><strong>SHA-256</strong><span>Every product receives a unique digital fingerprint</span></div>
       </section>
+
+      {latestRecord && <section className="latest-record"><div><p className="eyebrow">LATEST LEDGER ENTRY</p><h2>{latestRecord.productName}</h2><p>{latestRecord.productId} / {latestRecord.batchNumber}</p></div><div className="latest-record-meta"><span>CONFIRMED</span><strong>BLOCK #{latestRecord.blockNumber}</strong><small>{latestRecord.transactionHash?.slice(0, 12)}...</small></div><Link className="button button-quiet" to="/verify">Verify again <span>↗</span></Link></section>}
 
       <section className="home-section home-grid">
         <div>

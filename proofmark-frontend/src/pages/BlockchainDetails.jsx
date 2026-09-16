@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBlockchainDetails } from '../utils/web3';
+import { getBlockchainDetails, getTransactionDetails } from '../utils/web3';
 import '../css/pages.css';
 
 /**
@@ -14,6 +14,8 @@ function BlockchainDetails({ account }) {
   const [error, setError] = useState('');
   const [txHash, setTxHash] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
+  const [transactionResult, setTransactionResult] = useState(null);
+  const [searchError, setSearchError] = useState('');
 
   useEffect(() => {
     loadBlockchainDetails();
@@ -34,16 +36,18 @@ function BlockchainDetails({ account }) {
 
   const handleSearchTransaction = async () => {
     if (!txHash.trim()) {
-      alert('Please enter a transaction hash');
+      setSearchError('Enter a transaction hash to search.');
       return;
     }
 
     setSearchLoading(true);
+    setSearchError('');
+    setTransactionResult(null);
     try {
-      // In a real app, you'd query the blockchain for this tx
-      alert('Transaction lookup feature would be implemented with blockchain API');
+      const result = await getTransactionDetails(txHash);
+      setTransactionResult(result);
     } catch (err) {
-      console.error('Search error:', err);
+      setSearchError(err.message || 'Unable to find that transaction.');
     } finally {
       setSearchLoading(false);
     }
@@ -63,7 +67,7 @@ function BlockchainDetails({ account }) {
       </header>
 
       {/* Main Content */}
-      <main className="page-main">
+      <main className="page-main blockchain-page">
         {/* Loading State */}
         {loading && (
           <div className="alert alert-info">
@@ -93,7 +97,7 @@ function BlockchainDetails({ account }) {
                 <div className="info-card">
                   <h3>Chain ID</h3>
                   <p className="info-value">{blockchainInfo.chainId}</p>
-                  <small>Local Hardhat blockchain: 31337</small>
+                  <small>Hardhat Local network: chain 1337</small>
                 </div>
                 <div className="info-card">
                   <h3>Current Block</h3>
@@ -239,8 +243,29 @@ function BlockchainDetails({ account }) {
                 </button>
               </div>
               <p className="search-help">
-                Enter a transaction hash from your product registration to view details.
+                Enter a transaction hash from your product registration to read its on-chain status.
               </p>
+              {searchError && <p className="search-error">{searchError}</p>}
+              {transactionResult && (
+                <div className="transaction-result">
+                  <div className="transaction-result-header">
+                    <span className={`transaction-status ${transactionResult.status.toLowerCase()}`}>
+                      {transactionResult.status}
+                    </span>
+                    <span className="transaction-block">
+                      {transactionResult.blockNumber ? `Block #${transactionResult.blockNumber}` : 'Awaiting block'}
+                    </span>
+                  </div>
+                  <div className="transaction-result-grid">
+                    <div><span>Hash</span><code>{transactionResult.hash}</code></div>
+                    <div><span>From</span><code>{transactionResult.from}</code></div>
+                    <div><span>To</span><code>{transactionResult.to || 'Contract creation'}</code></div>
+                    <div><span>Gas used</span><strong>{transactionResult.gasUsed || 'Pending'}</strong></div>
+                    <div><span>Value</span><strong>{transactionResult.value} ETH</strong></div>
+                    <div><span>Timestamp</span><strong>{transactionResult.timestamp ? new Date(transactionResult.timestamp * 1000).toLocaleString() : 'Pending'}</strong></div>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Blockchain Concepts */}
