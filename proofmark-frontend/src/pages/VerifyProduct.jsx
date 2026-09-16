@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { generateProductHash, verifyProductOnBlockchain } from '../utils/web3';
 import '../css/pages.css';
 
@@ -19,6 +20,21 @@ function VerifyProduct({ account }) {
   const [verificationResult, setVerificationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  const copyValue = async (value) => {
+    await navigator.clipboard.writeText(value);
+    window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Copied to clipboard' }));
+  };
+
+  const downloadCertificate = () => {
+    const product = verificationResult.product;
+    const certificate = `<!doctype html><html><head><title>ProofMark Certificate</title><style>body{font-family:Arial;padding:48px;color:#17221f}h1{color:#0e766e}div{padding:12px 0;border-bottom:1px solid #ddd}small{display:block;color:#667}</style></head><body><h1>ProofMark Authenticity Certificate</h1><p>Verified on the local blockchain.</p><div><small>Product ID</small>${product.productId}</div><div><small>Product Name</small>${product.productName}</div><div><small>Batch Number</small>${product.batchNumber}</div><div><small>Manufacturer</small>${product.manufacturer}</div><div><small>Product Hash</small>${product.productHash}</div><div><small>Status</small>AUTHENTIC / ACTIVE</div></body></html>`;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([certificate], { type: 'text/html' }));
+    link.download = `proofmark-${product.productId}-certificate.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -190,7 +206,7 @@ function VerifyProduct({ account }) {
               <h3>Product Information:</h3>
               <div className="detail-row">
                 <span className="detail-label">Product Hash:</span>
-                <code className="detail-value">{verificationResult.product.productHash}</code>
+                <code className="detail-value copy-value" onClick={() => copyValue(verificationResult.product.productHash)} title="Copy hash">{verificationResult.product.productHash} ⧉</code>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Product ID:</span>
@@ -206,7 +222,7 @@ function VerifyProduct({ account }) {
               </div>
               <div className="detail-row">
                 <span className="detail-label">Manufacturer:</span>
-                <code className="detail-value">{verificationResult.product.manufacturer}</code>
+                <code className="detail-value copy-value" onClick={() => copyValue(verificationResult.product.manufacturer)} title="Copy address">{verificationResult.product.manufacturer} ⧉</code>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Registered On:</span>
@@ -228,6 +244,11 @@ function VerifyProduct({ account }) {
                 This product has been verified as authentic on the Ethereum blockchain.
                 The registration is immutable and cannot be changed or tampered with.
               </p>
+            </div>
+
+            <div className="proof-tools">
+              <div className="qr-card"><QRCodeCanvas value={`${window.location.origin}/verify?hash=${verificationResult.product.productHash}`} size={128} bgColor="#ffffff" fgColor="#0a3d3b" /><span>Scan to open verifier</span></div>
+              <div className="proof-tool-copy"><span className="info-kicker">PRESENTATION PROOF</span><h3>Carry the result with you.</h3><p>Copy the on-chain identifiers, generate a QR handoff, or download a lightweight certificate.</p><div className="proof-tool-actions"><button className="btn-secondary" onClick={() => copyValue(verificationResult.product.productHash)}>Copy hash</button><button className="btn-primary" onClick={downloadCertificate}>Download certificate</button></div></div>
             </div>
 
             <button
@@ -292,90 +313,81 @@ function VerifyProduct({ account }) {
 
         {/* How It Works */}
         <section className="info-section">
-          <h2>🔍 How Verification Works</h2>
+          <div className="info-heading">
+            <span className="info-kicker">THE CHECK</span>
+            <h2>How verification works</h2>
+            <p>Five quiet steps turn product details into a clear yes-or-no answer.</p>
+          </div>
           <ol className="steps-list">
             <li>
-              <strong>You Enter Details:</strong> Provide product information
+              <span className="step-index">01</span>
+              <div><strong>Enter details</strong><p>Provide the product ID, name, and batch number.</p></div>
             </li>
             <li>
-              <strong>Hash Generated:</strong> Frontend calculates SHA-256 hash (same as registration)
+              <span className="step-index">02</span>
+              <div><strong>Create the fingerprint</strong><p>ProofMark calculates a SHA-256 hash from the same fields used at registration.</p></div>
             </li>
             <li>
-              <strong>Blockchain Query:</strong> System checks if hash exists on blockchain
+              <span className="step-index">03</span>
+              <div><strong>Query the ledger</strong><p>The hash is checked against the registered records on-chain.</p></div>
             </li>
             <li>
-              <strong>Result Displayed:</strong> Authentic ✅ or Not Found ❌
+              <span className="step-index">04</span>
+              <div><strong>Read the result</strong><p>A matching record returns AUTHENTIC. No match returns NOT VERIFIED.</p></div>
             </li>
             <li>
-              <strong>No Gas Cost:</strong> Verification is read-only, completely free
+              <span className="step-index">05</span>
+              <div><strong>No gas required</strong><p>Verification is read-only, so it does not create a wallet transaction.</p></div>
             </li>
           </ol>
 
           <div className="key-point">
-            <strong>Key Point:</strong> If you enter different details (even one character different),
-            you'll get a completely different hash that won't match the blockchain.
-            This proves the data hasn't been tampered with.
+            <span className="key-point-mark">↯</span>
+            <div><strong>Why exact details matter</strong><p>Change even one character and the fingerprint changes completely. That mismatch is the signal that the submitted details do not match the original record.</p></div>
           </div>
         </section>
 
         {/* Important Note */}
         <section className="important-note">
-          <h2>⚠️ Important Limitations</h2>
+          <div className="section-title-row">
+            <span className="info-kicker">READ THIS FIRST</span>
+            <h2>Important limitations</h2>
+          </div>
+          <p className="section-intro">Blockchain proof is powerful, but it answers a specific question: was this information registered by an authorized manufacturer?</p>
           <ul className="limitations-list">
             <li>
-              <strong>Verifies Registration, Not Physical Authenticity:</strong>
-              This system verifies the product was registered by a manufacturer.
-              It does NOT verify the physical product in your hands is the actual registered item.
+              <span className="limitation-icon">01</span><div><strong>Registration is not a physical inspection</strong><p>This confirms a matching record exists. It cannot prove the object in your hands is the exact registered item.</p></div>
             </li>
             <li>
-              <strong>Requires Exact Match:</strong>
-              Product details must match exactly as registered (case-sensitive).
-              Even one character difference will fail verification.
+              <span className="limitation-icon">02</span><div><strong>Every character counts</strong><p>Product details are case-sensitive. One different character creates a different hash and fails verification.</p></div>
             </li>
             <li>
-              <strong>Trust in Product Details:</strong>
-              This assumes the product details are printed correctly on the physical product.
+              <span className="limitation-icon">03</span><div><strong>Printed details still matter</strong><p>The check assumes the ID, name, and batch number were copied correctly from the product.</p></div>
             </li>
             <li>
-              <strong>Manufacturer Authorization:</strong>
-              Only authorized manufacturers can register products.
-              This does not prevent counterfeiters from registering fake products.
+              <span className="limitation-icon">04</span><div><strong>Authorization protects registration</strong><p>Only approved wallets can write records. Physical security is still needed to deter copied or counterfeit products.</p></div>
             </li>
           </ul>
 
           <p className="note-text">
-            <strong>Best Practice:</strong> Combine blockchain verification with physical security features
-            (holograms, special packaging, serial numbers) for maximum protection against counterfeits.
+            <strong>Best practice</strong><span>Pair this check with holograms, secure packaging, serialized labels, or QR security features.</span>
           </p>
         </section>
 
         {/* Example Cases */}
         <section className="examples-section">
-          <h2>📝 Example Scenarios</h2>
+          <div className="section-title-row"><span className="info-kicker">THREE OUTCOMES</span><h2>Example scenarios</h2></div>
 
-          <div className="example">
-            <h4>✅ Authentic Product</h4>
-            <p>
-              <strong>What happens:</strong> Customer enters exact details → hash matches
-              blockchain → Shows manufacturer info, registration date → Status: AUTHENTIC
-            </p>
+          <div className="example example-authentic">
+            <span className="example-status">MATCH</span><div><h4>Authentic product</h4><p>Exact details produce the registered hash. Manufacturer information and registration date are shown.</p></div>
           </div>
 
           <div className="example">
-            <h4>❌ Product Not Registered</h4>
-            <p>
-              <strong>What happens:</strong> Customer enters details → hash doesn't exist
-              on blockchain → Shows "Not Found" message → Status: NOT VERIFIED
-            </p>
+            <span className="example-status">NO RECORD</span><div><h4>Product not registered</h4><p>The generated hash does not exist on the ledger, so the product is marked not verified.</p></div>
           </div>
 
           <div className="example">
-            <h4>❌ Wrong Details Entered</h4>
-            <p>
-              <strong>What happens:</strong> Customer enters slightly different details
-              (e.g., "BATCH-2024-02" instead of "BATCH-2024-01") → Different hash generated
-              → Doesn't match blockchain → Status: NOT VERIFIED
-            </p>
+            <span className="example-status">MISMATCH</span><div><h4>Wrong details entered</h4><p>A small difference, such as a changed batch number, creates a new hash and returns not verified.</p></div>
           </div>
         </section>
       </main>
