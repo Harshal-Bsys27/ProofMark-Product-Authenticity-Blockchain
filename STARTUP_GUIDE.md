@@ -2,6 +2,16 @@
 
 ## Quick Start (3 Steps)
 
+### Recommended One-Command Start
+
+From the project root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
+```
+
+Import Hardhat Account #0 into MetaMask once. It is automatically funded and authorized whenever the local node starts.
+
 Follow these steps to run the complete product authenticity verification system:
 
 ### Step 1: Start the Blockchain (Terminal 1)
@@ -148,6 +158,16 @@ Deployer balance: 10000 ETH
 
 **After this step completes, you can close Terminal 2** (or let it keep running, doesn't matter).
 
+For a custom MetaMask wallet, run this instead of `npm run deploy`:
+
+```powershell
+$env:MANUFACTURER_ADDRESS = "0xYOUR_METAMASK_WALLET"
+npm run setup-demo
+Remove-Item Env:MANUFACTURER_ADDRESS
+```
+
+This deploys the contract, authorizes the wallet, and adds 100 local test ETH.
+
 ---
 
 #### Terminal 3: Start Frontend
@@ -182,9 +202,9 @@ Local: http://localhost:3000
 In MetaMask:
 1. Click network dropdown (top left) → "Add a custom network"
 2. Enter these details:
-   - **Network Name:** Hardhat
-   - **RPC URL:** http://localhost:8545
-   - **Chain ID:** 31337
+   - **Network Name:** Hardhat Local
+   - **RPC URL:** http://127.0.0.1:8545
+   - **Chain ID:** 1337
    - **Currency Symbol:** ETH
 3. Click "Save"
 
@@ -407,7 +427,7 @@ Product-Authenticity-Blockchain/
 | Testing | Mocha + Chai | Latest |
 | Frontend | React | 18.2+ |
 | Web3 | ethers.js | 5.7+ |
-| Build Tool | Vite | Latest |
+| Build Tool | Create React App + CRACO | Frontend development and production build |
 | Wallet | MetaMask | Browser extension |
 | Hashing | SHA-256 | crypto module |
 
