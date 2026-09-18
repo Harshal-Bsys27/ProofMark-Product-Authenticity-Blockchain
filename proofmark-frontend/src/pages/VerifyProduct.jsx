@@ -10,6 +10,11 @@ import '../css/pages.css';
  * No wallet connection required for verification (read-only operation on blockchain).
  */
 function VerifyProduct({ account }) {
+  const demoProduct = {
+    productId: 'SKU-001',
+    productName: 'Whey Protein',
+    batchNumber: 'BATCH-2026-01'
+  };
   const [formData, setFormData] = useState({
     productId: '',
     productName: '',
@@ -45,6 +50,16 @@ function VerifyProduct({ account }) {
     setProductHash(null);
     setVerificationResult(null);
     setMessage('');
+  };
+
+  const loadDemoCase = (isTampered) => {
+    setFormData({
+      ...demoProduct,
+      batchNumber: isTampered ? 'BATCH-2026-99' : demoProduct.batchNumber
+    });
+    setProductHash(null);
+    setVerificationResult(null);
+    setMessage(isTampered ? 'Tampered demo loaded. Generate the hash to compare.' : 'Authentic demo loaded. Generate the hash to verify.');
   };
 
   const handleGenerateHash = () => {
@@ -156,6 +171,11 @@ function VerifyProduct({ account }) {
             <small>Must match the registered batch number exactly</small>
           </div>
 
+          <div className="demo-controls">
+            <div><span className="info-kicker">PRESENTATION MODE</span><strong>Try a prepared scenario</strong></div>
+            <div className="demo-actions"><button type="button" onClick={() => loadDemoCase(false)} disabled={loading}>Authentic sample</button><button type="button" onClick={() => loadDemoCase(true)} disabled={loading}>Tampered sample</button></div>
+          </div>
+
           <button
             className="btn-secondary"
             onClick={handleGenerateHash}
@@ -186,6 +206,8 @@ function VerifyProduct({ account }) {
             </button>
           </section>
         )}
+
+        {loading && <div className="verification-progress"><span className="progress-spinner" /><div><strong>Reading the ProofMark ledger</strong><p>Generating a response from the local blockchain...</p></div></div>}
 
         {/* Status Message */}
         {message && (
