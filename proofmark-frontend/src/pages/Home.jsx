@@ -1,13 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getBlockchainDetails } from '../utils/web3';
 import '../css/pages.css';
 
 function Home({ isConnected }) {
   const [latestRecord, setLatestRecord] = useState(null);
+  const [networkSnapshot, setNetworkSnapshot] = useState(null);
 
   useEffect(() => {
     const savedRecord = localStorage.getItem('proofmark-latest-registration');
     if (savedRecord) setLatestRecord(JSON.parse(savedRecord));
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const readNetwork = async () => {
+      if (!window.ethereum) return;
+      try {
+        const details = await getBlockchainDetails();
+        if (active) setNetworkSnapshot(details);
+      } catch (error) {
+        if (active) setNetworkSnapshot(null);
+      }
+    };
+    readNetwork();
+    const interval = window.setInterval(readNetwork, 12000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -51,6 +72,8 @@ function Home({ isConnected }) {
       </section>
 
       {latestRecord && <section className="latest-record"><div><p className="eyebrow">LATEST LEDGER ENTRY</p><h2>{latestRecord.productName}</h2><p>{latestRecord.productId} / {latestRecord.batchNumber}</p></div><div className="latest-record-meta"><span>CONFIRMED</span><strong>BLOCK #{latestRecord.blockNumber}</strong><small>{latestRecord.transactionHash?.slice(0, 12)}...</small></div><Link className="button button-quiet" to="/verify">Verify again <span>↗</span></Link></section>}
+
+      <section className="live-strip"><div className="live-pulse"><i /> LIVE LOCAL LEDGER</div><div><span>Current block</span><strong>{networkSnapshot ? `#${networkSnapshot.currentBlock}` : 'Waiting for RPC'}</strong></div><div><span>Contract</span><strong>{networkSnapshot ? `${networkSnapshot.contractAddress.slice(0, 8)}...${networkSnapshot.contractAddress.slice(-6)}` : 'Not connected'}</strong></div><Link to="/blockchain-details">View ledger <span>→</span></Link></section>
 
       <section className="home-section home-grid">
         <div>
