@@ -26,7 +26,13 @@ For the easiest repeatable demo, run this from the project root:
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
 ```
 
-It opens the blockchain and frontend terminals, waits for the RPC, deploys the contract, and prepares the default Hardhat Account #0.
+It opens the blockchain and frontend terminals, waits for the RPC, deploys the contract, updates the frontend contract address, and prepares the configured manufacturer wallet.
+
+To use a different MetaMask wallet:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_WALLET_ADDRESS"
+```
 
 Use the manual steps below only when you want to control each terminal separately.
 
@@ -48,11 +54,11 @@ cd "C:\Users\HARSHAL BARHATE\OneDrive\Desktop\Product-Authenticity-Blockchain\pr
 npm run setup-demo
 ```
 
-By default this deploys the contract for Hardhat Account #0, which is already authorized and funded with 10,000 test ETH by the node. It also writes `contractDeployment.json`.
+By default this deploys the contract for the configured demo wallet, authorizes it, funds it with 100 local test ETH, writes `contractDeployment.json`, and updates `proofmark-frontend/.env.local`.
 
 To use a different MetaMask wallet, set `MANUFACTURER_ADDRESS` before running the command. The script will authorize and fund that wallet with 100 test ETH.
 
-Use `npm run deploy` only when you want deployment without automatic authorization and funding.
+`npm run deploy` also authorizes and funds the default demo wallet. Set `MANUFACTURER_ADDRESS` when using another wallet.
 
 ## 4. Configure the Manufacturer Wallet
 
@@ -65,7 +71,7 @@ Chain ID: 1337
 Currency: ETH
 ```
 
-Import Hardhat Account #0 into MetaMask using this test-only private key printed by Terminal 1:
+Import a Hardhat test account into MetaMask using a test-only private key printed by Terminal 1:
 
 ```text
 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
@@ -73,13 +79,13 @@ Import Hardhat Account #0 into MetaMask using this test-only private key printed
 
 Never use this public test key on a real network.
 
-The recommended demo wallet is:
+The default configured demo wallet is:
 
 ```text
 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
-The `setup-demo` command above authorizes and funds it automatically after every Hardhat restart.
+The `setup-demo` command above authorizes and funds the configured wallet automatically after every Hardhat restart.
 
 To authorize manually:
 
@@ -129,18 +135,18 @@ Demo steps:
 7. Review the MetaMask transaction on Hardhat Local.
 8. Confirm the transaction.
 9. Point out the transaction hash, block number, manufacturer address, and gas used.
+10. Download the generated QR code from the registration result.
 
 Expected result: the product is registered successfully.
 
 ## 7. Verification Demonstration
 
 1. Open **Verify**.
-2. Enter the exact same values.
-3. Generate the hash.
-4. Click **Verify on Blockchain**.
-5. Point out the `AUTHENTIC` result, product record, manufacturer, registration time, and active status.
+2. Upload the downloaded QR image, use the camera scanner, or enter the exact same values.
+3. For manual entry, generate the hash and click **Verify on Blockchain**.
+4. Point out the `AUTHENTIC` result, product record, manufacturer, registration time, and active status.
 
-Explain that verification is a read-only operation, so MetaMask does not request a transaction or gas fee.
+Explain that verification uses the read-only `getProduct()` call, so MetaMask does not request a transaction or gas fee.
 
 ## 8. Tamper Demonstration
 
@@ -176,7 +182,7 @@ Select Hardhat Local in MetaMask. Confirm the chain ID is `1337`.
 
 ### Unauthorized manufacturer
 
-Run the `npm run authorize` command from this guide using the connected wallet address.
+Restart with `start-demo.ps1 -ManufacturerAddress "0xCONNECTED_WALLET"`, or run the manual authorization flow using the connected wallet address.
 
 ### Insufficient funds
 
@@ -184,7 +190,7 @@ Run the `npm run fund` command. The ETH is local test ETH and has no real value.
 
 ### Contract not found
 
-Keep Terminal 1 running and redeploy from Terminal 2. A Hardhat restart creates a new chain state.
+Keep Terminal 1 running and redeploy from Terminal 2. The deployment script updates `proofmark-frontend/.env.local`; restart the frontend afterward. A Hardhat restart creates a new chain state.
 
 ### Old frontend port
 

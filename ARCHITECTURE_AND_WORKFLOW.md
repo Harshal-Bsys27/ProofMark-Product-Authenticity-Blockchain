@@ -2,7 +2,7 @@
 
 ## 1. Project Purpose
 
-ProofMark is a blockchain-based product registration and verification system. An authorized manufacturer registers a product fingerprint on an Ethereum-compatible blockchain. A customer later enters the same product details and checks whether the generated fingerprint exists on-chain.
+ProofMark is a blockchain-based product registration and verification system. An authorized manufacturer registers a product fingerprint on an Ethereum-compatible blockchain and receives a downloadable QR proof. A customer can enter the same product details, scan the QR with a camera, or upload a QR image and check the fingerprint without a wallet.
 
 The system demonstrates:
 
@@ -87,6 +87,9 @@ Product data, manufacturer, timestamp, and active status are stored
         |
         v
 Transaction receipt and ProductRegistered event are created
+        |
+        v
+Frontend renders a verification QR containing the hash URL
 ```
 
 ### Stored Product Fields
@@ -104,13 +107,13 @@ The contract rejects duplicate hashes, empty product IDs, and empty product name
 ## 5. Verification Workflow
 
 ```text
-User enters the product details
+User enters details, scans a QR, or uploads a QR image
         |
         v
 Frontend calculates the same SHA-256 hash
         |
         v
-Frontend calls ProductAuthenticity.verifyProduct()
+Frontend calls the view-only ProductAuthenticity.getProduct()
         |
         v
 Contract checks the product mapping
@@ -120,7 +123,7 @@ Matching record -> AUTHENTIC
 No matching record -> NOT VERIFIED
 ```
 
-Verification is a read-only call. It does not create a transaction and does not require gas.
+Verification through manual entry, camera scanning, or QR upload is a read-only call. It does not create a transaction and does not require gas or a signer. The contract's `verifyProduct()` function remains available for event-emitting transaction-based verification, but the frontend uses `getProduct()` for customer checks.
 
 ## 6. Access Control
 
