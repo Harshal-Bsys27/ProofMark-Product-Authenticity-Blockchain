@@ -3,7 +3,7 @@ const path = require("path");
 
 const main = async () => {
   const manufacturerAddress = process.env.MANUFACTURER_ADDRESS ||
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+    "0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69";
   if (!manufacturerAddress || !ethers.utils.isAddress(manufacturerAddress)) {
     throw new Error(
       "Set MANUFACTURER_ADDRESS to the MetaMask wallet used for registration."
@@ -46,8 +46,14 @@ const main = async () => {
     JSON.stringify(deployment, null, 2)
   );
 
+  fs.writeFileSync(
+    path.join(__dirname, "..", "..", "proofmark-frontend", ".env.local"),
+    `REACT_APP_CONTRACT_ADDRESS=${contract.address}\n`
+  );
+
   console.log("ProofMark demo chain is ready.");
   console.log(`Contract: ${contract.address}`);
+  console.log("Frontend contract address updated.");
   console.log(`Authorized wallet: ${manufacturerAddress}`);
   console.log(
     manufacturerAddress.toLowerCase() === owner.address.toLowerCase()

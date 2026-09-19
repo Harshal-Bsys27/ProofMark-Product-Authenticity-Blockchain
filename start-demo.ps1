@@ -1,8 +1,11 @@
+param(
+  [string]$ManufacturerAddress = '0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69'
+)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $contracts = Join-Path $root 'proofmark-contracts'
 $frontend = Join-Path $root 'proofmark-frontend'
-$demoWallet = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+$demoWallet = $ManufacturerAddress
 
 Write-Host 'Starting ProofMark local blockchain...' -ForegroundColor Cyan
 Start-Process powershell -ArgumentList @(
@@ -31,4 +34,4 @@ Start-Process powershell -ArgumentList @(
 Write-Host ''
 Write-Host 'ProofMark is ready.' -ForegroundColor Green
 Write-Host 'Open the frontend URL printed by the frontend terminal.'
-Write-Host 'Use MetaMask Account #0 on Hardhat Local, chain ID 1337.' -ForegroundColor Yellow
+Write-Host "Use MetaMask wallet $demoWallet on Hardhat Local, chain ID 1337." -ForegroundColor Yellow

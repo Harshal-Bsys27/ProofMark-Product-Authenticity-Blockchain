@@ -43,6 +43,25 @@ const main = async () => {
     const deploymentTx = productAuthenticityContract.deployTransaction;
     const receipt = await deploymentTx.wait();
 
+    const manufacturerAddress = process.env.MANUFACTURER_ADDRESS ||
+      "0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69";
+    if (!ethers.utils.isAddress(manufacturerAddress)) {
+      throw new Error(`Invalid MANUFACTURER_ADDRESS: ${manufacturerAddress}`);
+    }
+
+    if (!(await productAuthenticityContract.authorizedManufacturers(manufacturerAddress))) {
+      const authorization = await productAuthenticityContract.authorizeManufacturer(manufacturerAddress);
+      await authorization.wait();
+    }
+
+    if (manufacturerAddress.toLowerCase() !== deployer.address.toLowerCase()) {
+      const funding = await deployer.sendTransaction({
+        to: manufacturerAddress,
+        value: ethers.utils.parseEther("100"),
+      });
+      await funding.wait();
+    }
+
     console.log("\n✅ Contract Deployed Successfully!");
     console.log("-".repeat(70));
     console.log(`Contract Address: ${productAuthenticityContract.address}`);
@@ -56,6 +75,7 @@ const main = async () => {
       network: hre.network.name,
       contractAddress: productAuthenticityContract.address,
       deployerAddress: deployer.address,
+      manufacturerAddress,
       transactionHash: deploymentTx.hash,
       blockNumber: receipt.blockNumber,
       deploymentTime: new Date().toISOString(),
@@ -74,7 +94,12 @@ const main = async () => {
       "contractDeployment.json"
     );
     fs.writeFileSync(contractInfoPath, JSON.stringify(deploymentInfo, null, 2));
+    fs.writeFileSync(
+      path.join(__dirname, "..", "..", "proofmark-frontend", ".env.local"),
+      `REACT_APP_CONTRACT_ADDRESS=${productAuthenticityContract.address}\n`
+    );
     console.log(`\n✅ Deployment info saved to: contractDeployment.json`);
+    console.log("✅ Frontend contract address updated in proofmark-frontend/.env.local");
 
     console.log("\n" + "=".repeat(70));
     console.log("NEXT STEPS:");
@@ -83,8 +108,7 @@ const main = async () => {
     console.log(
       "2. Update frontend/.env with: REACT_APP_CONTRACT_ADDRESS=<address>"
     );
-    console.log("3. Authorize manufacturers:");
-    console.log("   await contract.authorizeManufacturer(manufacturerAddress)");
+    console.log(`3. Authorized manufacturer: ${manufacturerAddress}`);
     console.log("4. Start the frontend with: npm start (in frontend directory)");
     console.log("=".repeat(70) + "\n");
 
