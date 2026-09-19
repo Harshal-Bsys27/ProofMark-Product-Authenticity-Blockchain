@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
+import { Scanner } from '@yudiel/react-qr-scanner';
+import jsQR from 'jsqr';
 import { generateProductHash, verifyProductOnBlockchain } from '../utils/web3';
 import '../css/pages.css';
 
@@ -10,11 +13,13 @@ import '../css/pages.css';
  * No wallet connection required for verification (read-only operation on blockchain).
  */
 function VerifyProduct({ account }) {
+  const location = useLocation();
   const demoProduct = {
     productId: 'SKU-001',
     productName: 'Whey Protein',
     batchNumber: 'BATCH-2026-01'
   };
+  const [scanOpen, setScanOpen] = useState(false);
   const [formData, setFormData] = useState({
     productId: '',
     productName: '',
@@ -29,6 +34,129 @@ function VerifyProduct({ account }) {
   const copyValue = async (value) => {
     await navigator.clipboard.writeText(value);
     window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Copied to clipboard' }));
+  };
+
+  const extractHashFromQrValue = (value) => {
+    if (!value) return null;
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.startsWith('0x') && trimmedValue.length === 66) {
+      return trimmedValue;
+    }
+
+    try {
+      const parsedUrl = new URL(trimmedValue);
+      const hashFromUrl = parsedUrl.searchParams.get('hash') || parsedUrl.searchParams.get('productHash');
+      if (hashFromUrl && /^0x[a-fA-F0-9]{64}$/.test(hashFromUrl)) {
+        return hashFromUrl;
+      }
+    } catch (error) {
+      // Not a URL; continue with fallback parsing.
+    }
+
+    const directMatch = trimmedValue.match(/0x[a-fA-F0-9]{64}/);
+    if (directMatch) {
+      return directMatch[0];
+    }
+
+    const paramsMatch = trimmedValue.match(/[?&](?:hash|productHash)=([0-9a-fA-Fx]+)/i);
+    if (paramsMatch) {
+      return paramsMatch[1].startsWith('0x') ? paramsMatch[1] : `0x${paramsMatch[1]}`;
+    }
+
+    return null;
+  };
+
+  const verifyHash = async (hashValue) => {
+    if (!hashValue) {
+      setMessage('⚠️ No product hash available to verify');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('⏳ Verifying product on blockchain...');
+
+    try {
+      const result = await verifyProductOnBlockchain(hashValue);
+
+      if (result.success) {
+        setVerificationResult(result.verification);
+        setProductHash(hashValue);
+        if (result.verification.isAuthentic) {
+          setMessage('✅ Product is AUTHENTIC!');
+        } else {
+          setMessage('❌ Product NOT FOUND on blockchain');
+        }
+      } else {
+        setMessage(`⚠️ Verification error: ${result.error}`);
+      }
+    } catch (error) {
+      setMessage(`❌ Error: ${error.message}`);
+      console.error('Verification error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQrScan = (result) => {
+    const scannedValue = result?.[0]?.rawValue || result?.rawValue || result;
+    const hash = extractHashFromQrValue(scannedValue);
+
+    if (!hash) {
+      setMessage('⚠️ QR code did not contain a valid product hash.');
+      return;
+    }
+
+    setScanOpen(false);
+    setProductHash(hash);
+    setMessage('✅ QR code scanned. Verifying product...');
+    void verifyHash(hash);
+  };
+
+  const handleQrUpload = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage('⚠️ Please upload a QR code image.');
+      return;
+    }
+
+    setMessage('⏳ Reading QR image...');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        if (!image.naturalWidth || !image.naturalHeight) {
+          setMessage('⚠️ The uploaded image has no readable dimensions.');
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) {
+          setMessage('⚠️ Your browser could not process this image.');
+          return;
+        }
+        context.drawImage(image, 0, 0);
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+
+        if (!decoded?.data) {
+          setMessage('⚠️ No readable QR code was found in that image.');
+          return;
+        }
+
+        handleQrScan([{ rawValue: decoded.data }]);
+      };
+      image.onerror = () => setMessage('⚠️ The uploaded image could not be read.');
+      image.src = reader.result;
+    };
+    reader.onerror = () => setMessage('⚠️ The uploaded image could not be read.');
+    reader.readAsDataURL(file);
   };
 
   const downloadCertificate = () => {
@@ -84,29 +212,17 @@ function VerifyProduct({ account }) {
       return;
     }
 
-    setLoading(true);
-    setMessage('⏳ Verifying product on blockchain...');
-
-    try {
-      const result = await verifyProductOnBlockchain(productHash);
-
-      if (result.success) {
-        setVerificationResult(result.verification);
-        if (result.verification.isAuthentic) {
-          setMessage('✅ Product is AUTHENTIC!');
-        } else {
-          setMessage('❌ Product NOT FOUND on blockchain');
-        }
-      } else {
-        setMessage(`⚠️ Verification error: ${result.error}`);
-      }
-    } catch (error) {
-      setMessage(`❌ Error: ${error.message}`);
-      console.error('Verification error:', error);
-    } finally {
-      setLoading(false);
-    }
+    await verifyHash(productHash);
   };
+
+  useEffect(() => {
+    const hashFromQuery = new URLSearchParams(location.search).get('hash');
+    if (hashFromQuery && /^0x[a-fA-F0-9]{64}$/.test(hashFromQuery)) {
+      setProductHash(hashFromQuery);
+      setMessage('✅ Product link detected. Verifying...');
+      void verifyHash(hashFromQuery);
+    }
+  }, [location.search]);
 
   return (
     <div className="page-container">
@@ -128,6 +244,35 @@ function VerifyProduct({ account }) {
             Enter the exact same product details as they were registered.
             The system will generate the same hash and check the blockchain.
           </p>
+
+          <div className="demo-controls" style={{ marginBottom: '20px' }}>
+            <div><span className="info-kicker">SCAN</span><strong>Scan a QR proof</strong></div>
+            <div className="qr-input-actions">
+              <label className="btn-secondary qr-upload-button" htmlFor="product-qr-upload">Upload QR</label>
+              <input id="product-qr-upload" type="file" accept="image/*" onChange={handleQrUpload} disabled={loading} />
+              <button type="button" className="btn-secondary" onClick={() => setScanOpen((prev) => !prev)} disabled={loading}>
+                {scanOpen ? 'Close scanner' : 'Open scanner'}
+              </button>
+            </div>
+          </div>
+
+          {scanOpen && (
+            <div className="verification-progress" style={{ display: 'block', marginBottom: '20px', gridColumn: 'unset' }}>
+              <div style={{ marginBottom: '10px' }}><strong>Camera scan</strong><p>Point the camera at a ProofMark QR code to verify instantly.</p></div>
+              <div style={{ maxWidth: '420px', margin: '0 auto' }}>
+                <Scanner
+                  onScan={handleQrScan}
+                  onError={(error) => {
+                    console.error('Scanner error:', error);
+                    setMessage('⚠️ QR scanner could not access the camera. Please enter the product details manually.');
+                  }}
+                  formats={['qr_code']}
+                  constraints={{ facingMode: 'environment' }}
+                  styles={{ container: { borderRadius: '12px', overflow: 'hidden' } }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="productId">Product ID (SKU):</label>

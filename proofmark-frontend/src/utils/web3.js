@@ -13,8 +13,14 @@ import { ethers } from 'ethers';
 // Contract ABI - Functions we're calling on smart contract
 const CONTRACT_ABI = [
   "function registerProduct(bytes32 _productHash, string memory _productId, string memory _productName, string memory _batchNumber) public returns (bool)",
-  "function verifyProduct(bytes32 _productHash) public view returns (bool isAuthentic, tuple(string productId, string productName, string batchNumber, bytes32 productHash, address manufacturer, uint256 registrationTime, bool isActive) product, string message)",
+  "function verifyProduct(bytes32 _productHash) public returns (bool isAuthentic, tuple(string productId, string productName, string batchNumber, bytes32 productHash, address manufacturer, uint256 registrationTime, bool isActive) product, string message)",
+  "function getProductCount() public view returns (uint256)",
+  "function getProductHashAt(uint256 _index) public view returns (bytes32)",
+  "function getProduct(bytes32 _productHash) public view returns (tuple(string productId, string productName, string batchNumber, bytes32 productHash, address manufacturer, uint256 registrationTime, bool isActive) product, bool exists)",
+  "function deactivateProduct(bytes32 _productHash) public",
+  "function isManufacturerAuthorized(address _manufacturer) public view returns (bool)",
   "event ProductRegistered(bytes32 indexed productHash, string productId, address indexed manufacturer, uint256 registrationTime)",
+  "event ProductDeactivated(bytes32 indexed productHash, address indexed deactivatedBy, uint256 deactivationTime, uint256 blockNumber)",
 ];
 
 // Get contract address from environment or localStorage
@@ -139,6 +145,14 @@ export const registerProductOnBlockchain = async (
       signer
     );
 
+    const signerAddress = await signer.getAddress();
+    const isAuthorized = await contract.isManufacturerAuthorized(signerAddress);
+    if (!isAuthorized) {
+      throw new Error(
+        `Wallet ${signerAddress} is not authorized on this deployment. Run start-demo.ps1 with -ManufacturerAddress ${signerAddress}.`
+      );
+    }
+
     // Call registerProduct function
     console.log('Registering product with hash:', productHash);
     const tx = await contract.registerProduct(
@@ -192,18 +206,25 @@ export const verifyProductOnBlockchain = async (productHash) => {
       provider
     );
 
-    // Call verifyProduct function
+    // Use the view-only lookup so customers never need a wallet or signer.
     console.log('Verifying product with hash:', productHash);
-    const result = await contract.verifyProduct(productHash);
+    const result = await contract.getProduct(productHash);
+    const product = result.product || result[0];
+    const exists = result.exists ?? result[1];
+    const isAuthentic = Boolean(exists && product.isActive);
 
     console.log('Verification result:', result);
 
     return {
       success: true,
       verification: {
-        isAuthentic: result.isAuthentic,
-        product: result.product || null,
-        message: result.message || ''
+        isAuthentic,
+        product: exists ? product : null,
+        message: isAuthentic
+          ? 'Product verified - AUTHENTIC - Registered on blockchain'
+          : exists
+            ? 'Product has been deactivated - NOT VERIFIED'
+            : 'Product not found on blockchain - NOT VERIFIED'
       }
     };
   } catch (error) {
@@ -243,6 +264,69 @@ export const getBlockchainDetails = async () => {
   } catch (error) {
     console.error('Error getting blockchain details:', error);
     throw error;
+  }
+};
+
+export const getProductHistory = async () => {
+  try {
+    const provider = getProvider();
+    const contractAddress = getContractAddress();
+    const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, provider);
+    const total = Number(await contract.getProductCount());
+    const entries = [];
+
+    for (let i = 0; i < total; i += 1) {
+      const hash = await contract.getProductHashAt(i);
+      const [product, exists] = await contract.getProduct(hash);
+      if (exists) {
+        entries.push({
+          hash,
+          productId: product.productId,
+          productName: product.productName,
+          batchNumber: product.batchNumber,
+          manufacturer: product.manufacturer,
+          registrationTime: Number(product.registrationTime),
+          isActive: product.isActive,
+        });
+      }
+    }
+
+    return entries.slice().reverse();
+  } catch (error) {
+    console.error('Error loading product history:', error);
+    return [];
+  }
+};
+
+export const deactivateProductOnBlockchain = async (productHash, account) => {
+  try {
+    if (!account) {
+      throw new Error('Wallet not connected');
+    }
+
+    await ensureLocalNetwork();
+    const signer = await getSigner();
+    const contractAddress = getContractAddress();
+    const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer);
+    const tx = await contract.deactivateProduct(productHash);
+    const receipt = await tx.wait();
+
+    return {
+      success: true,
+      details: {
+        transactionHash: receipt.transactionHash,
+        blockNumber: receipt.blockNumber,
+        manufacturer: account,
+        gasUsed: receipt.gasUsed.toString(),
+        timestamp: Math.floor(Date.now() / 1000),
+      }
+    };
+  } catch (error) {
+    console.error('Error deactivating product:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to deactivate product'
+    };
   }
 };
 
@@ -447,6 +531,8 @@ const web3Utils = {
   registerProductOnBlockchain,
   verifyProductOnBlockchain,
   getBlockchainDetails,
+  getProductHistory,
+  deactivateProductOnBlockchain,
   getTransactionDetails,
   connectWallet,
   checkWalletConnection,

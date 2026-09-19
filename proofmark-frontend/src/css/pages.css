@@ -134,6 +134,10 @@ code { font-family: var(--mono); font-size: .9em; }
 .proof-tool-copy p { max-width: 430px; margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
 .proof-tool-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .proof-tool-actions button { width: auto; min-width: 120px; margin: 0; }
+.registration-proof-tools { margin-top: 22px; }
+.qr-input-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.qr-upload-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; margin-top: 8px; cursor: pointer; }
+.qr-input-actions input[type='file'] { display: none; }
 .info-section { grid-column: 2 !important; grid-row: 1 / span 3; background: var(--white); border: 1px solid var(--line); padding: 25px; }
 .info-heading { padding-bottom: 20px; border-bottom: 1px solid var(--line); }
 .info-kicker { color: var(--coral); font-family: var(--mono); font-size: 9px; letter-spacing: .14em; }
@@ -248,6 +252,16 @@ code { font-family: var(--mono); font-size: .9em; }
 .security-list li > span { color: var(--coral); font-family: var(--mono); font-size: 10px; }
 .security-list strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: 13px; }
 .security-list p { margin: 0; color: var(--ink-soft); font-size: 11px; line-height: 1.55; }
+.history-panel { margin-top: 24px; padding: 24px; background: var(--white); border: 1px solid var(--line); }
+.history-list { display: grid; gap: 12px; }
+.history-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); }
+.history-item strong { display: block; font-size: 14px; }
+.history-item p, .history-item small { margin: 6px 0 0; color: var(--ink-soft); font-size: 11px; }
+.history-actions { display: flex; align-items: center; gap: 10px; }
+.status-pill { padding: 7px 9px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.status-pill.active { background: rgba(118,198,93,.15); color: var(--teal); }
+.status-pill.inactive { background: rgba(244,124,90,.12); color: #b25736; }
+.btn-secondary.small { padding: 8px 10px; min-width: 0; }
 
 @media (max-width: 800px) {
   .home-page, .page-container { width: min(100% - 32px, 620px); }

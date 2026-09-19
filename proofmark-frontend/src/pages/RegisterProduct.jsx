@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { generateProductHash, registerProductOnBlockchain } from '../utils/web3';
+import React, { useState, useEffect } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
+import { generateProductHash, registerProductOnBlockchain, getProductHistory, deactivateProductOnBlockchain } from '../utils/web3';
 import '../css/pages.css';
 
 /**
@@ -17,8 +18,21 @@ function RegisterProduct({ account, isConnected }) {
 
   const [productHash, setProductHash] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
   const [message, setMessage] = useState('');
   const [transactionDetails, setTransactionDetails] = useState(null);
+
+  useEffect(() => {
+    const refreshHistory = async () => {
+      if (!isConnected) {
+        setHistory([]);
+        return;
+      }
+      const records = await getProductHistory();
+      setHistory(records);
+    };
+    refreshHistory();
+  }, [isConnected, transactionDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,13 +85,17 @@ function RegisterProduct({ account, isConnected }) {
 
       if (result.success) {
         setTransactionDetails(result.details);
-        localStorage.setItem('proofmark-latest-registration', JSON.stringify({
-          ...result.details,
+        const registeredProduct = {
           productId: formData.productId,
           productName: formData.productName,
           batchNumber: formData.batchNumber,
           productHash,
+        };
+        localStorage.setItem('proofmark-latest-registration', JSON.stringify({
+          ...result.details,
+          ...registeredProduct,
         }));
+        setTransactionDetails({ ...result.details, ...registeredProduct });
         setMessage('✅ Product registered successfully!');
         
         // Reset form
@@ -96,6 +114,31 @@ function RegisterProduct({ account, isConnected }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const downloadQrCode = () => {
+    const canvas = document.getElementById('registered-product-qr');
+    if (!canvas || !transactionDetails?.productId) return;
+
+    const link = document.createElement('a');
+    link.download = `proofmark-${transactionDetails.productId}-qr.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  const handleDeactivateProduct = async (hash) => {
+    setLoading(true);
+    setMessage('⏳ Deactivating product on blockchain...');
+    const result = await deactivateProductOnBlockchain(hash, account);
+    if (result.success) {
+      setMessage('✅ Product deactivated successfully.');
+      setTransactionDetails(null);
+      const refreshed = await getProductHistory();
+      setHistory(refreshed);
+    } else {
+      setMessage(`❌ Deactivation failed: ${result.error}`);
+    }
+    setLoading(false);
   };
 
   return (
@@ -237,12 +280,56 @@ function RegisterProduct({ account, isConnected }) {
               ✨ Your product is now registered on the blockchain and cannot be tampered with!
             </p>
 
+            <div className="proof-tools registration-proof-tools">
+              <div className="qr-card">
+                <QRCodeCanvas
+                  id="registered-product-qr"
+                  value={`${window.location.origin}/verify?hash=${transactionDetails.productHash}`}
+                  size={160}
+                  bgColor="#ffffff"
+                  fgColor="#0a3d3b"
+                />
+                <span>Product verification QR</span>
+              </div>
+              <div className="proof-tool-copy">
+                <span className="info-kicker">PRODUCT HANDOFF</span>
+                <h3>QR proof ready.</h3>
+                <p>Attach this QR code to the product label or share it with a buyer. Scanning it opens the verifier with this product hash.</p>
+                <div className="proof-tool-actions">
+                  <button className="btn-primary" type="button" onClick={downloadQrCode}>Download QR</button>
+                </div>
+              </div>
+            </div>
+
             <button
               className="btn-secondary"
               onClick={() => setTransactionDetails(null)}
             >
               Register Another Product
             </button>
+          </section>
+        )}
+
+        {isConnected && history.length > 0 && (
+          <section className="history-panel">
+            <div className="section-title-row"><span className="info-kicker">MANUFACTURER VIEW</span><h2>Registered product ledger</h2></div>
+            <div className="history-list">
+              {history.map((entry) => (
+                <div className="history-item" key={entry.hash}>
+                  <div>
+                    <strong>{entry.productName}</strong>
+                    <p>{entry.productId} • {entry.batchNumber}</p>
+                    <small>{entry.hash.slice(0, 12)}...{entry.hash.slice(-8)} • {new Date(entry.registrationTime * 1000).toLocaleDateString()}</small>
+                  </div>
+                  <div className="history-actions">
+                    <span className={`status-pill ${entry.isActive ? 'active' : 'inactive'}`}>{entry.isActive ? 'Active' : 'Inactive'}</span>
+                    {entry.isActive && (
+                      <button className="btn-secondary small" type="button" onClick={() => handleDeactivateProduct(entry.hash)}>Deactivate</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
