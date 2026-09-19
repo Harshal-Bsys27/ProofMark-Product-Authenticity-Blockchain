@@ -14,13 +14,13 @@ ProofMark records essential product identity data on an Ethereum-compatible bloc
 
 ## Fastest Start
 
-Import Hardhat Account #0 into MetaMask once, then run this from the project root:
+Run this from the project root. It authorizes and funds the configured MetaMask wallet automatically:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
 ```
 
-The launcher starts Hardhat, deploys the contract, and starts the frontend with a funded and authorized local demo account.
+The launcher starts Hardhat, deploys the contract, updates `proofmark-frontend/.env.local`, and starts the frontend with a funded and authorized local demo wallet. To use another wallet, pass `-ManufacturerAddress "0xYOUR_WALLET"`.
 
 ---
 
@@ -107,7 +107,7 @@ VERIFY:   Product Data → Same SHA-256 Hash → Blockchain Lookup → Result
 │  ┌──────────────────────────┐    │
 │  │ ProductAuthenticity SC   │    │
 │  │  - registerProduct()     │    │
-│  │  - verifyProduct()       │    │
+│  │  - getProduct()          │    │
 │  │  - deactivateProduct()   │    │
 │  └──────────────────────────┘    │
 └─────────────────────────────────┘
@@ -150,7 +150,10 @@ VERIFY:   Product Data → Same SHA-256 Hash → Blockchain Lookup → Result
 // Register product on blockchain
 registerProduct(bytes32 hash, string productId, string name, string batch)
 
-// Verify if product is authentic
+// Read product details without a wallet or gas
+getProduct(bytes32 hash) returns (Product, bool)
+
+// Emit an on-chain verification event when called as a transaction
 verifyProduct(bytes32 hash) returns (bool, Product, string)
 
 // Get product details
@@ -248,7 +251,23 @@ npm run compile
 
 ## 🚀 Running the Project
 
-### Quick Start (3 Terminals)
+### Quick Start
+
+Use the one-command launcher from the project root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
+```
+
+For a different MetaMask wallet:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_WALLET_ADDRESS"
+```
+
+The launcher deploys the contract, authorizes and funds the manufacturer wallet, writes the current address to `proofmark-frontend/.env.local`, and starts the frontend.
+
+Manual setup is also available:
 
 **Terminal 1 - Start Blockchain:**
 ```bash
@@ -260,7 +279,7 @@ npm run node
 ```bash
 cd proofmark-contracts
 npm run deploy
-# Note the Contract Address displayed
+# This also authorizes/funds the default demo wallet and updates frontend/.env.local
 ```
 
 **Terminal 3 - Start Frontend:**
@@ -271,13 +290,15 @@ npm start
 
 The frontend normally opens at `http://localhost:3000`. If that port is busy, use the URL printed by React.
 
-After a fresh Hardhat restart, authorize the MetaMask wallet used for registration:
+For a custom wallet during manual setup, use:
 
 ```powershell
 $env:MANUFACTURER_ADDRESS = "0xYOUR_WALLET_ADDRESS"
 npm run authorize
 Remove-Item Env:MANUFACTURER_ADDRESS
 ```
+
+Restart the frontend after deployment so React loads the updated contract address.
 
 ---
 
@@ -295,16 +316,19 @@ Remove-Item Env:MANUFACTURER_ADDRESS
 5. Click "Register on Blockchain"
 6. Approve in MetaMask
 7. ✅ See transaction hash and block number
+8. Download the generated product QR code from the successful registration panel
 
 ### Verify a Product (Customer)
 
 1. Go to "Verify Product"
-2. Enter product details (same as registration)
-3. Click "Verify"
+2. Upload a downloaded product QR image, open the camera scanner, or enter product details manually
+3. Generate the hash when using manual entry, then click "Verify"
 4. See result:
    - ✅ AUTHENTIC - Product found on blockchain
    - ⚠️ NOT VERIFIED - Product not found
 5. View blockchain details if authentic
+
+Verification uses the read-only `getProduct()` lookup, so QR upload, camera scanning, and manual verification do not require MetaMask or gas.
 
 ### View Blockchain Details
 

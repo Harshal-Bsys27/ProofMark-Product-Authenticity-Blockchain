@@ -10,7 +10,13 @@ From the project root:
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
 ```
 
-Import Hardhat Account #0 into MetaMask once. It is automatically funded and authorized whenever the local node starts.
+The startup script automatically deploys a fresh contract, authorizes the configured MetaMask wallet, and funds it with local test ETH whenever the local node starts. The default wallet is the one currently used for this demo: `0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69`.
+
+To use a different MetaMask wallet, pass its address:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_METAMASK_WALLET"
+```
 
 Follow these steps to run the complete product authenticity verification system:
 
@@ -45,7 +51,8 @@ npm run deploy
 **What this does:**
 - Compiles the Solidity smart contract
 - Deploys it to the local blockchain
-- Saves contract address for frontend to use
+- Authorizes and funds the configured manufacturer wallet
+- Saves the contract address and updates `proofmark-frontend/.env.local`
 - Shows the deployment details
 
 **Expected output:**
@@ -54,7 +61,7 @@ npm run deploy
 📦 Contract saved to contractDeployment.json
 ```
 
-**Important:** Copy the contract address from the output. You'll need it in Step 3.
+**Important:** The frontend contract address is updated automatically. Restart the frontend after a manual deployment so React loads the new `.env.local` value.
 
 ### Step 3: Start the Frontend (Terminal 3)
 
@@ -153,12 +160,13 @@ Deployer balance: 10000 ETH
 ```
 
 **Important Actions:**
-1. Copy the contract address (starts with 0x)
-2. You'll use this address in the frontend configuration
+1. Confirm the contract address (starts with 0x)
+2. Confirm MetaMask is using the authorized manufacturer wallet
+3. The frontend uses the generated address from `.env.local`
 
 **After this step completes, you can close Terminal 2** (or let it keep running, doesn't matter).
 
-For a custom MetaMask wallet, run this instead of `npm run deploy`:
+For a custom MetaMask wallet when using the manual flow, run this instead of `npm run deploy`:
 
 ```powershell
 $env:MANUFACTURER_ADDRESS = "0xYOUR_METAMASK_WALLET"
@@ -166,7 +174,9 @@ npm run setup-demo
 Remove-Item Env:MANUFACTURER_ADDRESS
 ```
 
-This deploys the contract, authorizes the wallet, and adds 100 local test ETH.
+This deploys the contract, authorizes the wallet, adds 100 local test ETH, and updates `proofmark-frontend/.env.local` with the new contract address.
+
+Plain `npm run deploy` now uses the demo MetaMask wallet above by default. For any other wallet, pass `MANUFACTURER_ADDRESS` or use `start-demo.ps1 -ManufacturerAddress ...` so the registration wallet is authorized automatically. Restart the frontend after manual deployment so React loads the updated `.env.local` address.
 
 ---
 

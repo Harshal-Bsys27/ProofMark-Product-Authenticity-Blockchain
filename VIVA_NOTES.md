@@ -239,27 +239,27 @@ function registerProduct(
 - Can't add duplicate
 - Everyone gets notified
 
-### Main Function 2: verifyProduct()
+### Main Function 2: getProduct()
 
 ```solidity
-function verifyProduct(bytes32 _productHash)
+function getProduct(bytes32 _productHash)
     public
-    returns (bool isAuthentic, Product memory product, string memory message)
+   view
+   returns (Product memory product, bool exists)
 ```
 
 **What it does:**
 1. Checks if product hash exists on blockchain
-2. Checks if product is active (not deactivated)
-3. Returns:
-   - isAuthentic: true/false
-   - product: full product data
-   - message: human-readable result
+2. Returns the product record and an existence flag
+3. The frontend checks the record's active status
 
 **In simple terms:**
 - Like checking if an entry exists in notebook
-- No cost (read operation)
+- No cost (view-only read operation)
 - Returns exact status
 - Anyone can verify
+
+The contract also contains `verifyProduct()`, which emits a `ProductVerified` event and is therefore a transaction-capable function. The frontend uses `getProduct()` so customer verification never requires a signer.
 
 ### Access Control
 
@@ -658,8 +658,8 @@ Step 2: Frontend generates hash
   - Apply SHA-256 algorithm
   - Get: 0x5f8c3a4d... (same as manufacturer used)
 
-Step 3: Call smart contract
-  - verifyProduct(0x5f8c3a4d...)
+Step 3: Read smart contract
+   - getProduct(0x5f8c3a4d...)
   - Query blockchain for this hash
 
 Step 4: Smart contract checks
@@ -676,6 +676,8 @@ Key points:
 - Hash must match exactly (even 1-bit difference fails)
 - Blockchain stores immutable proof
 - Customer can verify anytime, anywhere
+- Customer can scan a QR with the camera or upload a QR image
+- Registration produces a downloadable QR handoff
 - No central authority needed"
 
 ---

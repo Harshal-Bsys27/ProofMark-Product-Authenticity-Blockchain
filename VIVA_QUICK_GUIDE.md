@@ -2,7 +2,7 @@
 
 ## 1. One-Minute Introduction
 
-> ProofMark is a blockchain-based product authenticity verification system. An authorized manufacturer enters a product ID, product name, and batch number. The frontend generates a SHA-256 fingerprint and sends it to a Solidity smart contract through MetaMask. The contract stores the product record on an Ethereum-compatible blockchain. Later, anyone can enter the same details and perform a read-only lookup. If the generated fingerprint matches the stored record, the product is shown as authentic.
+> ProofMark is a blockchain-based product authenticity verification system. An authorized manufacturer enters a product ID, product name, and batch number. The frontend generates a SHA-256 fingerprint and sends it to a Solidity smart contract through MetaMask. After registration, ProofMark generates a QR proof containing the verification URL. Anyone can enter the same details, scan that QR, or upload its image and perform a read-only lookup. If the fingerprint matches an active record, the product is shown as authentic.
 
 ## 2. Problem Statement
 
@@ -28,8 +28,9 @@ Use this order during the presentation:
 3. MetaMask signs a registration transaction.
 4. The Solidity contract validates the manufacturer.
 5. The contract stores the product record and emits an event.
-6. A customer later generates the same hash.
-7. The frontend queries the contract without sending a transaction.
+6. The frontend generates a downloadable QR containing the verification URL.
+7. A customer enters details, scans the QR, or uploads the QR image.
+8. The frontend queries `getProduct()` without sending a transaction.
 
 ## 5. Important Smart Contract Functions
 
@@ -37,9 +38,13 @@ Use this order during the presentation:
 
 A write function protected by `onlyAuthorizedManufacturer`. It rejects duplicate hashes and empty required fields, then stores the product and emits `ProductRegistered`.
 
+### `getProduct()`
+
+A view-only read function. It returns the product record and an existence flag. The frontend treats an existing active record as `AUTHENTIC`, so customers do not need MetaMask, a signer, or gas.
+
 ### `verifyProduct()`
 
-A read function. It checks whether the hash exists, whether the record is active, and returns the product details and a message.
+An event-emitting contract function that can record verification attempts as transactions. The current frontend uses `getProduct()` for wallet-free customer verification.
 
 ### `authorizeManufacturer()`
 
@@ -99,7 +104,9 @@ No. It proves that matching details were registered by an authorized wallet. A c
 - Authorize the demonstration wallet.
 - Fund the wallet with local test ETH if necessary.
 - Demonstrate one successful registration.
+- Download the generated product QR.
 - Demonstrate one authentic verification.
+- Demonstrate verification by uploading the QR image or using the camera scanner.
 - Change one field and demonstrate not verified.
 - Show the transaction hash and Ledger page.
 - Explain limitations honestly.
