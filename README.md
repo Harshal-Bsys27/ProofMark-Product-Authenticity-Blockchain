@@ -267,6 +267,14 @@ powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "
 
 The launcher deploys the contract, authorizes and funds the manufacturer wallet, writes the current address to `proofmark-frontend/.env.local`, and starts the frontend.
 
+`start-demo.ps1` also remembers the manufacturer wallet in `.proofmark-manufacturer` and publishes runtime deployment metadata to the frontend. This means the frontend can recover from a fresh Hardhat deployment without reusing an old contract address. Use the same launcher after every Hardhat restart; do not reuse an already-open frontend tab from the previous chain session.
+
+When MetaMask is connected, select the wallet printed by the launcher. To use a different wallet, provide it once with `-ManufacturerAddress`; that address is then remembered for future starts:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_WALLET_ADDRESS"
+```
+
 Manual setup is also available:
 
 **Terminal 1 - Start Blockchain:**
