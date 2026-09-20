@@ -96,7 +96,6 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
         </button>
 
         <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Primary navigation">
-          <span className="nav-label">WORKSPACE</span>
           <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}><span>01</span>Overview</NavLink>
           <NavLink to="/verify" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}><span>02</span>Verify</NavLink>
           <NavLink to="/register" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}><span>03</span>Register</NavLink>
@@ -104,7 +103,10 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
         </nav>
 
         <div className="header-actions">
-          <span className="network-status"><i /><span><small>NETWORK</small>Hardhat Local</span></span>
+          <div className="header-badges">
+            <span className="network-status"><i /><span><small>NETWORK</small>Hardhat Local</span></span>
+            <span className="status-pill-inline">Demo mode</span>
+          </div>
           {isConnected ? (
             <button className="wallet-chip" type="button" onClick={disconnectWallet} title="Disconnect wallet">
               <i /><span><small>CONNECTED / {balance === null ? '--' : `${balance} ETH`}</small>{shortenAddress(account)}</span>
