@@ -75,6 +75,31 @@ function Home({ isConnected }) {
 
       <section className="live-strip"><div className="live-pulse"><i /> LIVE LOCAL LEDGER</div><div><span>Current block</span><strong>{networkSnapshot ? `#${networkSnapshot.currentBlock}` : 'Waiting for RPC'}</strong></div><div><span>Contract</span><strong>{networkSnapshot ? `${networkSnapshot.contractAddress.slice(0, 8)}...${networkSnapshot.contractAddress.slice(-6)}` : 'Not connected'}</strong></div><Link to="/blockchain-details">View ledger <span>→</span></Link></section>
 
+      <section className="feature-grid">
+        <article className="feature-card feature-highlight">
+          <p className="eyebrow"><span /> PROOF FLOW</p>
+          <h3>From manufacturing to shelf check.</h3>
+          <p>Every item is mapped to a unique hash, stored on-chain, and then verified instantly without a manual trust check.</p>
+          <ul>
+            <li>Product registration</li>
+            <li>Signed blockchain entry</li>
+            <li>Scan and verification</li>
+          </ul>
+        </article>
+
+        <article className="feature-card">
+          <p className="eyebrow"><span /> WHY IT MATTERS</p>
+          <h3>Trust built into the handoff.</h3>
+          <p>ProofMark helps you prove provenance, reduce counterfeit risk, and create a repeatable product record customers can verify.</p>
+        </article>
+
+        <article className="feature-card">
+          <p className="eyebrow"><span /> DEMO READY</p>
+          <h3>Built for quick storytelling.</h3>
+          <p>Clear status states, QR-based proof, and live ledger details make the presentation feel credible from the first click.</p>
+        </article>
+      </section>
+
       <section className="home-section home-grid">
         <div>
           <p className="eyebrow">THE LEDGER MODEL</p>
@@ -85,6 +110,25 @@ function Home({ isConnected }) {
           <article><span>01</span><div><h3>Traceable</h3><p>See who registered a product and when it entered the ledger.</p></div></article>
           <article><span>02</span><div><h3>Unaltered</h3><p>A changed ID, name, or batch creates a completely different hash.</p></div></article>
           <article><span>03</span><div><h3>Accessible</h3><p>Verification is a free, read-only check. No wallet required.</p></div></article>
+        </div>
+      </section>
+
+      <section className="home-section stats-panel">
+        <div className="mini-stat">
+          <span>AUTHORITY</span>
+          <strong>Manufacturer-led</strong>
+        </div>
+        <div className="mini-stat">
+          <span>VERIFICATION</span>
+          <strong>Instant read-only</strong>
+        </div>
+        <div className="mini-stat">
+          <span>ACCESS</span>
+          <strong>Public & private</strong>
+        </div>
+        <div className="mini-stat accent">
+          <span>STATUS</span>
+          <strong>{isConnected ? 'Connected' : 'Open demo'}</strong>
         </div>
       </section>
 
