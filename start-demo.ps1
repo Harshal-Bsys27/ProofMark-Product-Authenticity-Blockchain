@@ -1,11 +1,22 @@
 param(
-  [string]$ManufacturerAddress = '0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69'
+  [string]$ManufacturerAddress
 )
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $contracts = Join-Path $root 'proofmark-contracts'
 $frontend = Join-Path $root 'proofmark-frontend'
+$walletFile = Join-Path $root '.proofmark-manufacturer'
 $demoWallet = $ManufacturerAddress
+
+if ([string]::IsNullOrWhiteSpace($demoWallet) -and (Test-Path $walletFile)) {
+  $demoWallet = (Get-Content $walletFile -Raw).Trim()
+}
+
+if ([string]::IsNullOrWhiteSpace($demoWallet)) {
+  $demoWallet = '0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69'
+}
+
+Set-Content -Path $walletFile -Value $demoWallet -NoNewline
 
 Write-Host 'Starting ProofMark local blockchain...' -ForegroundColor Cyan
 Start-Process powershell -ArgumentList @(
