@@ -391,50 +391,34 @@ function BlockchainDetails({ account }) {
         )}
 
         {/* Help Section */}
-        <section className="help-section">
-          <h2>❓ FAQ - Blockchain Details</h2>
-
-          <div className="faq-item">
-            <h4>Q: What network is this using?</h4>
-            <p>
-              A: This is using a local Ethereum-compatible blockchain (Hardhat).
-              It simulates Ethereum locally on your computer for testing and learning.
-            </p>
+        <section className="help-section faq-section">
+          <div className="faq-heading">
+            <span className="info-kicker">QUICK ANSWERS</span>
+            <h2>❓ FAQ - Blockchain Details</h2>
+            <p>Clear answers to the questions people usually have when reading an on-chain record.</p>
           </div>
 
-          <div className="faq-item">
-            <h4>Q: Why does gas cost money?</h4>
-            <p>
-              A: Gas pays miners/validators to process and secure transactions.
-              It prevents spam and incentivizes network security.
-              Read operations (verification) are free.
-            </p>
-          </div>
-
-          <div className="faq-item">
-            <h4>Q: How is the blockchain secured?</h4>
-            <p>
-              A: Cryptographic hashing and consensus mechanisms make blockchain secure.
-              To change one transaction, you'd need to redo all subsequent work.
-              With many participants, this becomes computationally impossible.
-            </p>
-          </div>
-
-          <div className="faq-item">
-            <h4>Q: Can I see all transactions on blockchain?</h4>
-            <p>
-              A: Yes! Blockchain is transparent. All transactions are public and visible.
-              You can search any transaction hash to see details.
-              This transparency is one of blockchain's key features.
-            </p>
-          </div>
-
-          <div className="faq-item">
-            <h4>Q: What happens if a node goes down?</h4>
-            <p>
-              A: The blockchain continues on other nodes. Your data is safe because
-              copies exist on thousands of computers. No single point of failure.
-            </p>
+          <div className="faq-grid">
+            <article className="faq-item">
+              <span className="faq-index">01</span>
+              <div><h3>What network is this using?</h3><p>This uses a local Ethereum-compatible blockchain powered by Hardhat. It simulates Ethereum on your computer for testing and learning.</p></div>
+            </article>
+            <article className="faq-item">
+              <span className="faq-index">02</span>
+              <div><h3>Why does gas cost money?</h3><p>Gas pays the network to process and secure transactions. Registration uses gas, while read-only verification does not.</p></div>
+            </article>
+            <article className="faq-item">
+              <span className="faq-index">03</span>
+              <div><h3>How is the blockchain secured?</h3><p>Cryptographic hashing and consensus mechanisms protect the ledger. Changing a confirmed record would require recomputing the records that follow it.</p></div>
+            </article>
+            <article className="faq-item">
+              <span className="faq-index">04</span>
+              <div><h3>Can I see all transactions?</h3><p>Yes. Blockchain transactions are transparent and searchable. Use the transaction search above to inspect a registration record.</p></div>
+            </article>
+            <article className="faq-item">
+              <span className="faq-index">05</span>
+              <div><h3>What happens if a node goes down?</h3><p>On a distributed public network, other nodes keep copies of the ledger. This local demo has one local node, so restart it with the project launcher when it stops.</p></div>
+            </article>
           </div>
         </section>
       </main>

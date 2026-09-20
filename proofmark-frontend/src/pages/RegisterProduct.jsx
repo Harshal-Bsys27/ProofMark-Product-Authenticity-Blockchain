@@ -134,6 +134,16 @@ function RegisterProduct({ account, isConnected }) {
     link.click();
   };
 
+  const downloadHistoryQrCode = (entry) => {
+    const canvas = document.getElementById(`history-qr-${entry.hash.slice(2)}`);
+    if (!canvas) return;
+
+    const link = document.createElement('a');
+    link.download = `proofmark-${entry.productId}-qr.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
   const handleDeactivateProduct = async (hash) => {
     setLoading(true);
     setMessage('⏳ Deactivating product on blockchain...');
@@ -330,6 +340,23 @@ function RegisterProduct({ account, isConnected }) {
                     <small>{entry.hash.slice(0, 12)}...{entry.hash.slice(-8)} • {new Date(entry.registrationTime * 1000).toLocaleDateString()}</small>
                   </div>
                   <div className="history-actions">
+                    <div className="history-qr">
+                      <QRCodeCanvas
+                        id={`history-qr-${entry.hash.slice(2)}`}
+                        value={`${window.location.origin}/verify?hash=${entry.hash}`}
+                        size={58}
+                        bgColor="#ffffff"
+                        fgColor="#0a3d3b"
+                      />
+                      <button
+                        className="btn-secondary small"
+                        type="button"
+                        onClick={() => downloadHistoryQrCode(entry)}
+                        title={`Download QR for ${entry.productId}`}
+                      >
+                        ↓ QR
+                      </button>
+                    </div>
                     <span className={`status-pill ${entry.isActive ? 'active' : 'inactive'}`}>{entry.isActive ? 'Active' : 'Inactive'}</span>
                     {entry.isActive && (
                       <button className="btn-secondary small" type="button" onClick={() => handleDeactivateProduct(entry.hash)}>Deactivate</button>

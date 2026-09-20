@@ -30,6 +30,7 @@ function VerifyProduct({ account }) {
   const [verificationResult, setVerificationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [processingStage, setProcessingStage] = useState('idle');
 
   const copyValue = async (value) => {
     await navigator.clipboard.writeText(value);
@@ -74,10 +75,14 @@ function VerifyProduct({ account }) {
     }
 
     setLoading(true);
+    setProcessingStage('syncing');
     setMessage('⏳ Verifying product on blockchain...');
 
     try {
-      const result = await verifyProductOnBlockchain(hashValue);
+      const [result] = await Promise.all([
+        verifyProductOnBlockchain(hashValue),
+        new Promise((resolve) => window.setTimeout(resolve, 700))
+      ]);
 
       if (result.success) {
         setVerificationResult(result.verification);
@@ -87,11 +92,14 @@ function VerifyProduct({ account }) {
         } else {
           setMessage('❌ Product NOT FOUND on blockchain');
         }
+        setProcessingStage('idle');
       } else {
         setMessage(`⚠️ Verification error: ${result.error}`);
+        setProcessingStage('error');
       }
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
+      setProcessingStage('error');
       console.error('Verification error:', error);
     } finally {
       setLoading(false);
@@ -104,12 +112,13 @@ function VerifyProduct({ account }) {
 
     if (!hash) {
       setMessage('⚠️ QR code did not contain a valid product hash.');
+      setProcessingStage('error');
       return;
     }
 
     setScanOpen(false);
     setProductHash(hash);
-    setMessage('✅ QR code scanned. Verifying product...');
+    setMessage('⏳ QR code decoded. Syncing with the ProofMark ledger...');
     void verifyHash(hash);
   };
 
@@ -120,16 +129,24 @@ function VerifyProduct({ account }) {
 
     if (!file.type.startsWith('image/')) {
       setMessage('⚠️ Please upload a QR code image.');
+      setProcessingStage('error');
       return;
     }
 
+    setLoading(true);
+    setVerificationResult(null);
+    setProductHash(null);
+    setProcessingStage('reading');
     setMessage('⏳ Reading QR image...');
     const reader = new FileReader();
     reader.onload = () => {
       const image = new Image();
       image.onload = () => {
+        setProcessingStage('decoding');
         if (!image.naturalWidth || !image.naturalHeight) {
           setMessage('⚠️ The uploaded image has no readable dimensions.');
+          setProcessingStage('error');
+          setLoading(false);
           return;
         }
 
@@ -139,6 +156,8 @@ function VerifyProduct({ account }) {
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (!context) {
           setMessage('⚠️ Your browser could not process this image.');
+          setProcessingStage('error');
+          setLoading(false);
           return;
         }
         context.drawImage(image, 0, 0);
@@ -147,15 +166,25 @@ function VerifyProduct({ account }) {
 
         if (!decoded?.data) {
           setMessage('⚠️ No readable QR code was found in that image.');
+          setProcessingStage('error');
+          setLoading(false);
           return;
         }
 
         handleQrScan([{ rawValue: decoded.data }]);
       };
-      image.onerror = () => setMessage('⚠️ The uploaded image could not be read.');
+      image.onerror = () => {
+        setMessage('⚠️ The uploaded image could not be read.');
+        setProcessingStage('error');
+        setLoading(false);
+      };
       image.src = reader.result;
     };
-    reader.onerror = () => setMessage('⚠️ The uploaded image could not be read.');
+    reader.onerror = () => {
+      setMessage('⚠️ The uploaded image could not be read.');
+      setProcessingStage('error');
+      setLoading(false);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -178,6 +207,7 @@ function VerifyProduct({ account }) {
     setProductHash(null);
     setVerificationResult(null);
     setMessage('');
+    setProcessingStage('idle');
   };
 
   const loadDemoCase = (isTampered) => {
@@ -188,6 +218,7 @@ function VerifyProduct({ account }) {
     setProductHash(null);
     setVerificationResult(null);
     setMessage(isTampered ? 'Tampered demo loaded. Generate the hash to compare.' : 'Authentic demo loaded. Generate the hash to verify.');
+    setProcessingStage('idle');
   };
 
   const handleGenerateHash = () => {
@@ -352,7 +383,26 @@ function VerifyProduct({ account }) {
           </section>
         )}
 
-        {loading && <div className="verification-progress"><span className="progress-spinner" /><div><strong>Reading the ProofMark ledger</strong><p>Generating a response from the local blockchain...</p></div></div>}
+        {(loading || processingStage === 'error') && (
+          <div className={`verification-progress verification-progress-${processingStage}`}>
+            {processingStage !== 'error' && <span className="progress-spinner" />}
+            <div className="verification-progress-copy">
+              <strong>
+                {processingStage === 'reading' && 'Reading QR image'}
+                {processingStage === 'decoding' && 'Decoding QR proof'}
+                {processingStage === 'syncing' && 'Syncing with the ProofMark ledger'}
+                {processingStage === 'error' && 'Verification could not be completed'}
+              </strong>
+              <p>
+                {processingStage === 'reading' && 'Loading the uploaded image securely...'}
+                {processingStage === 'decoding' && 'Extracting the signed product fingerprint...'}
+                {processingStage === 'syncing' && 'Checking the fingerprint against the local blockchain...'}
+                {processingStage === 'error' && 'Check the QR image and local network, then try again.'}
+              </p>
+              {processingStage !== 'error' && <span className="verification-progress-track"><span /></span>}
+            </div>
+          </div>
+        )}
 
         {/* Status Message */}
         {message && (
@@ -425,6 +475,7 @@ function VerifyProduct({ account }) {
                 setProductHash(null);
                 setVerificationResult(null);
                 setMessage('');
+                setProcessingStage('idle');
               }}
             >
               Verify Another Product
@@ -471,6 +522,7 @@ function VerifyProduct({ account }) {
                 setProductHash(null);
                 setVerificationResult(null);
                 setMessage('');
+                setProcessingStage('idle');
               }}
             >
               Try Another Product
