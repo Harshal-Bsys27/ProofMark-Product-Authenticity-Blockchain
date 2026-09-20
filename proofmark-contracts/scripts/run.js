@@ -17,11 +17,11 @@ const main = async () => {
     console.log("Product history added:", historyTxn.hash);
 
     // const history2Txn = await productContract.addProductHistory("001", "Supplier Group", "sloc", "12345678", false);
-    // await history2Txn.wait();
+    // await history2Txn.wait() ;
     // console.log("Product history added:", history2Txn.hash);
     // time.increase(86400);
     const prod = await productContract.getProduct("001");
-    console.log("Product:", prod);
+    console.log("Product:", prod) ;
   };
   
   const runMain = async () => {
