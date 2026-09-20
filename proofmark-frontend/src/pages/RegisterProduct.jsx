@@ -10,6 +10,14 @@ import '../css/pages.css';
  * Combines product data and generates SHA-256 hash for blockchain storage.
  */
 function RegisterProduct({ account, isConnected }) {
+  const registrationSteps = [
+    { title: 'Enter details', text: 'Provide product ID, name, and batch number.' },
+    { title: 'Generate hash', text: 'Frontend calculates the SHA-256 hash from the combined data.' },
+    { title: 'Sign transaction', text: 'MetaMask asks you to approve the signed blockchain record.' },
+    { title: 'Blockchain storage', text: 'The smart contract stores the hash on-chain for verification.' },
+    { title: 'Immutable record', text: 'The registration remains durable and can only be deactivated intentionally.' }
+  ];
+
   const [formData, setFormData] = useState({
     productId: '',
     productName: '',
@@ -337,21 +345,15 @@ function RegisterProduct({ account, isConnected }) {
         <section className="info-section">
           <h2>🔍 How Registration Works</h2>
           <ol className="steps-list">
-            <li>
-              <strong>Enter Details:</strong> Provide product ID, name, and batch number
-            </li>
-            <li>
-              <strong>Generate Hash:</strong> Frontend calculates SHA-256 hash of combined data
-            </li>
-            <li>
-              <strong>Sign Transaction:</strong> MetaMask asks you to sign with your private key
-            </li>
-            <li>
-              <strong>Blockchain Storage:</strong> Smart contract stores hash on blockchain
-            </li>
-            <li>
-              <strong>Immutable Record:</strong> Registration cannot be changed or deleted
-            </li>
+            {registrationSteps.map((step, index) => (
+              <li key={step.title}>
+                <span className="step-index">{String(index + 1).padStart(2, '0')}</span>
+                <div>
+                  <strong>{step.title}:</strong>
+                  <p>{step.text}</p>
+                </div>
+              </li>
+            ))}
           </ol>
         </section>
 
