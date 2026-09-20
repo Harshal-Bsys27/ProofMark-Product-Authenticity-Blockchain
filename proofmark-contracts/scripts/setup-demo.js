@@ -36,6 +36,7 @@ const main = async () => {
     network: "localhost",
     contractAddress: contract.address,
     deployerAddress: owner.address,
+    manufacturerAddress,
     transactionHash: deploymentTx.transactionHash,
     blockNumber: deploymentTx.blockNumber,
     deploymentTime: new Date().toISOString(),
@@ -49,6 +50,11 @@ const main = async () => {
   fs.writeFileSync(
     path.join(__dirname, "..", "..", "proofmark-frontend", ".env.local"),
     `REACT_APP_CONTRACT_ADDRESS=${contract.address}\n`
+  );
+
+  fs.writeFileSync(
+    path.join(__dirname, "..", "..", "proofmark-frontend", "public", "contractDeployment.json"),
+    JSON.stringify(deployment, null, 2)
   );
 
   console.log("ProofMark demo chain is ready.");

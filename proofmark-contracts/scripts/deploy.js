@@ -98,6 +98,10 @@ const main = async () => {
       path.join(__dirname, "..", "..", "proofmark-frontend", ".env.local"),
       `REACT_APP_CONTRACT_ADDRESS=${productAuthenticityContract.address}\n`
     );
+    fs.writeFileSync(
+      path.join(__dirname, "..", "..", "proofmark-frontend", "public", "contractDeployment.json"),
+      JSON.stringify(deploymentInfo, null, 2)
+    );
     console.log(`\n✅ Deployment info saved to: contractDeployment.json`);
     console.log("✅ Frontend contract address updated in proofmark-frontend/.env.local");
 
