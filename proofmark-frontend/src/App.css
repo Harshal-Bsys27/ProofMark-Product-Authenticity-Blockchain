@@ -134,6 +134,93 @@ body.theme-dark .site-header {
   border-bottom-color: rgba(125, 211, 252, 0.16);
   box-shadow: inset 0 -1px 0 rgba(125, 211, 252, 0.08);
 }
+body.theme-dark .alert,
+body.theme-dark .message {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(251, 191, 36, 0.75);
+  color: var(--ink);
+}
+body.theme-dark .message.success {
+  background: rgba(22, 101, 52, 0.2);
+  border-color: #86efac;
+}
+body.theme-dark .message.info,
+body.theme-dark .alert-info {
+  background: rgba(14, 116, 144, 0.2);
+  border-color: var(--teal);
+}
+body.theme-dark .message.error,
+body.theme-dark .alert-error {
+  background: rgba(127, 29, 29, 0.24);
+  border-color: #fca5a5;
+}
+body.theme-dark .verification-proof {
+  background: rgba(22, 101, 52, 0.18);
+  border: 1px solid rgba(134, 239, 172, 0.25);
+}
+body.theme-dark .page-header .account-info,
+body.theme-dark .page-header .no-wallet-note,
+body.theme-dark .history-panel,
+body.theme-dark .help-section,
+body.theme-dark .blockchain-page .info-section,
+body.theme-dark .blockchain-page .concepts-section,
+body.theme-dark .blockchain-page .info-card,
+body.theme-dark .blockchain-page .function-card,
+body.theme-dark .blockchain-page .transaction-info,
+body.theme-dark .blockchain-page .details-table,
+body.theme-dark .security-note {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(11, 16, 32, 0.96));
+  border-color: var(--line);
+  color: var(--ink);
+}
+body.theme-dark .page-header .account-info,
+body.theme-dark .page-header .no-wallet-note {
+  color: var(--teal);
+}
+body.theme-dark .history-panel .section-title-row h2,
+body.theme-dark .blockchain-page .info-section h2,
+body.theme-dark .blockchain-page .concepts-section h2,
+body.theme-dark .blockchain-page .transaction-info h2 {
+  color: var(--ink);
+}
+body.theme-dark .history-item {
+  background: rgba(30, 41, 59, 0.62);
+  border-color: var(--line);
+}
+body.theme-dark .blockchain-page .info-card small,
+body.theme-dark .blockchain-page .details-table th,
+body.theme-dark .blockchain-page .details-table td,
+body.theme-dark .faq-heading p,
+body.theme-dark .faq-item p {
+  color: var(--ink-soft);
+}
+body.theme-dark .faq-item {
+  background: rgba(30, 41, 59, 0.62);
+  border-color: var(--line);
+}
+body.theme-dark .faq-heading h2,
+body.theme-dark .faq-item h3 {
+  color: var(--ink);
+}
+body.theme-dark .verification-proof h3,
+body.theme-dark .success-message,
+body.theme-dark .proof-text {
+  color: #a7f3d0;
+}
+body.theme-dark .warning-box,
+body.theme-dark .next-steps {
+  background: rgba(127, 29, 29, 0.16);
+  border-color: rgba(252, 165, 165, 0.25);
+}
+body.theme-dark .warning-box p,
+body.theme-dark .warning-box li,
+body.theme-dark .next-steps li {
+  color: var(--ink-soft);
+}
+body.theme-dark .warning-box strong,
+body.theme-dark .next-steps h3 {
+  color: #fecaca;
+}
 body.theme-dark .feature-card,
 body.theme-dark .mini-stat,
 body.theme-dark .live-strip,

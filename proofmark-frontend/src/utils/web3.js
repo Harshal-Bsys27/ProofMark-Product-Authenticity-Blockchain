@@ -23,11 +23,42 @@ const CONTRACT_ABI = [
   "event ProductDeactivated(bytes32 indexed productHash, address indexed deactivatedBy, uint256 deactivationTime, uint256 blockNumber)",
 ];
 
-// Get contract address from environment or localStorage
-const getContractAddress = () => {
-  return process.env.REACT_APP_CONTRACT_ADDRESS || 
-    localStorage.getItem('contractAddress') ||
-      '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Default local address
+// Runtime deployment metadata prevents a stale dev-server environment from pointing at an old chain.
+const getContractAddress = async () => {
+  try {
+    const response = await fetch(`/contractDeployment.json?ts=${Date.now()}`, { cache: 'no-store' });
+    if (response.ok) {
+      const deployment = await response.json();
+      if (ethers.utils.isAddress(deployment.contractAddress)) {
+        localStorage.setItem('contractAddress', deployment.contractAddress);
+        return deployment.contractAddress;
+      }
+    }
+  } catch (error) {
+    // Fall back to the build environment when runtime metadata is unavailable.
+  }
+
+  const configuredAddress = localStorage.getItem('contractAddress') || process.env.REACT_APP_CONTRACT_ADDRESS;
+  if (!configuredAddress || !ethers.utils.isAddress(configuredAddress)) {
+    throw new Error('No local contract deployment found. Run start-demo.ps1 and restart Hardhat Local.');
+  }
+  return configuredAddress;
+};
+
+const ensureContractCode = async (provider, contractAddress) => {
+  const code = await provider.getCode(contractAddress);
+  if (!code || code === '0x') {
+    throw new Error(
+      `No contract is deployed at ${contractAddress}. Start the demo with start-demo.ps1 so the frontend receives the current deployment.`
+    );
+  }
+};
+
+const formatContractError = (error, fallback) => {
+  if (error?.code === 'CALL_EXCEPTION') {
+    return 'The local deployment is out of sync with this frontend. Run start-demo.ps1, then reconnect MetaMask to Hardhat Local.';
+  }
+  return error?.message || fallback;
 };
 
 /**
@@ -138,7 +169,8 @@ export const registerProductOnBlockchain = async (
     const signer = await getSigner();
     
     // Get contract instance
-    const contractAddress = getContractAddress();
+    const contractAddress = await getContractAddress();
+    await ensureContractCode(provider, contractAddress);
     const contract = new ethers.Contract(
       contractAddress,
       CONTRACT_ABI,
@@ -183,7 +215,7 @@ export const registerProductOnBlockchain = async (
     console.error('Error registering product:', error);
     return {
       success: false,
-      error: error.message || 'Failed to register product'
+      error: formatContractError(error, 'Failed to register product')
     };
   }
 };
@@ -199,7 +231,8 @@ export const verifyProductOnBlockchain = async (productHash) => {
     const provider = getProvider();
     
     // Get contract instance (read-only)
-    const contractAddress = getContractAddress();
+    const contractAddress = await getContractAddress();
+    await ensureContractCode(provider, contractAddress);
     const contract = new ethers.Contract(
       contractAddress,
       CONTRACT_ABI,
@@ -231,7 +264,7 @@ export const verifyProductOnBlockchain = async (productHash) => {
     console.error('Error verifying product:', error);
     return {
       success: false,
-      error: error.message || 'Failed to verify product'
+      error: formatContractError(error, 'Failed to verify product')
     };
   }
 };
@@ -251,7 +284,8 @@ export const getBlockchainDetails = async () => {
     const gasPrice = await provider.getGasPrice();
 
     // Get contract address
-    const contractAddress = getContractAddress();
+    const contractAddress = await getContractAddress();
+    await ensureContractCode(provider, contractAddress);
 
     return {
       networkName: network.name || 'Unknown Network',
@@ -270,7 +304,8 @@ export const getBlockchainDetails = async () => {
 export const getProductHistory = async () => {
   try {
     const provider = getProvider();
-    const contractAddress = getContractAddress();
+    const contractAddress = await getContractAddress();
+    await ensureContractCode(provider, contractAddress);
     const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, provider);
     const total = Number(await contract.getProductCount());
     const entries = [];
@@ -305,8 +340,10 @@ export const deactivateProductOnBlockchain = async (productHash, account) => {
     }
 
     await ensureLocalNetwork();
+    const provider = getProvider();
     const signer = await getSigner();
-    const contractAddress = getContractAddress();
+    const contractAddress = await getContractAddress();
+    await ensureContractCode(provider, contractAddress);
     const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer);
     const tx = await contract.deactivateProduct(productHash);
     const receipt = await tx.wait();
@@ -325,7 +362,7 @@ export const deactivateProductOnBlockchain = async (productHash, account) => {
     console.error('Error deactivating product:', error);
     return {
       success: false,
-      error: error.message || 'Failed to deactivate product'
+      error: formatContractError(error, 'Failed to deactivate product')
     };
   }
 };

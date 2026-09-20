@@ -100,10 +100,18 @@
 .demo-actions { display: flex; gap: 6px; }
 .demo-actions button { padding: 9px 10px; border: 1px solid var(--line); background: var(--white); color: var(--teal); cursor: pointer; font-family: var(--mono); font-size: 9px; }
 .demo-actions button:hover:not(:disabled) { border-color: var(--teal); background: #edf8e8; }
-.verification-progress { grid-column: 1 / -1; display: flex; align-items: center; gap: 13px; padding: 16px 18px; background: var(--teal-dark); color: var(--white); }
+.verification-progress { grid-column: 1 / -1; display: flex; align-items: flex-start; gap: 13px; padding: 18px 20px; background: linear-gradient(135deg, #101b36, #172554); color: var(--white); border: 1px solid rgba(125,211,252,.24); }
 .verification-progress strong { display: block; color: var(--mint); font-size: 12px; }
 .verification-progress p { margin: 4px 0 0; color: #b7c9c1; font-size: 11px; }
 .progress-spinner { width: 22px; height: 22px; flex: 0 0 22px; border: 2px solid rgba(183,243,151,.25); border-top-color: var(--mint); border-radius: 50%; animation: proofmark-spin .8s linear infinite; }
+.verification-progress-copy { width: 100%; min-width: 0; }
+.verification-progress-track { display: block; height: 3px; margin-top: 13px; overflow: hidden; background: rgba(255,255,255,.12); }
+.verification-progress-track span { display: block; width: 42%; height: 100%; background: var(--teal); animation: proofmark-progress 1.2s ease-in-out infinite; }
+.verification-progress-complete { background: rgba(22,101,52,.28); border-color: rgba(134,239,172,.4); }
+.verification-progress-complete strong { color: #bbf7d0; }
+.verification-progress-error { background: rgba(127,29,29,.28); border-color: rgba(252,165,165,.45); }
+.verification-progress-error strong { color: #fecaca; }
+@keyframes proofmark-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
 @keyframes proofmark-spin { to { transform: rotate(360deg); } }
 .btn-primary, .btn-secondary, .btn-large, .btn-primary-large { width: 100%; min-height: 46px; margin-top: 8px; padding: 0 18px; border: 1px solid transparent; border-radius: 0; cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; transition: background .2s ease, color .2s ease; }
 .btn-primary, .btn-primary-large { background: var(--teal); color: var(--white); }
@@ -139,6 +147,9 @@ code { font-family: var(--mono); font-size: .9em; }
 .result-badge.error { background: #ffe0d8; color: #8b301c; }
 .verification-proof { margin-top: 22px; padding: 18px; background: #f1f8ed; }
 .verification-proof h3 { margin: 0 0 8px; color: var(--teal); font-size: 14px; }
+.warning-box, .next-steps { margin-top: 18px; padding: 18px; background: var(--paper); border: 1px solid var(--line); }
+.warning-box p, .next-steps h3 { margin-top: 0; }
+.warning-box ul, .next-steps ol { margin-bottom: 0; color: var(--ink-soft); line-height: 1.7; }
 .copy-value { cursor: copy; }
 .copy-value:hover { color: var(--teal); }
 .proof-tools { display: grid; grid-template-columns: 160px 1fr; gap: 24px; align-items: center; margin-top: 18px; padding: 18px; background: var(--paper); border: 1px solid var(--line); }
@@ -244,6 +255,15 @@ code { font-family: var(--mono); font-size: .9em; }
 .details-table td strong { color: var(--ink); }
 .action-section { padding: 0; }
 .action-section .btn-secondary { max-width: 250px; }
+.help-section { grid-column: 1 / -1; padding: 28px; background: var(--white); border: 1px solid var(--line); }
+.faq-heading { max-width: 620px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.faq-heading h2 { margin: 9px 0 8px; color: var(--ink); font-size: 25px; letter-spacing: -.05em; }
+.faq-heading p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
+.faq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.faq-item { display: grid; grid-template-columns: 34px 1fr; gap: 14px; min-height: 142px; padding: 19px; background: var(--paper); border: 1px solid var(--line); }
+.faq-index { color: var(--coral); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.faq-item h3 { margin: 0 0 8px; color: var(--ink); font-size: 14px; letter-spacing: -.02em; }
+.faq-item p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.65; }
 .tech-info, .security-note { grid-column: 1 / -1; padding: 28px; background: var(--white); border: 1px solid var(--line); }
 .tech-info .section-title-row h2, .security-note .section-title-row h2 { margin: 8px 0 0; }
 .storage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -273,6 +293,9 @@ code { font-family: var(--mono); font-size: .9em; }
 .history-item strong { display: block; font-size: 14px; }
 .history-item p, .history-item small { margin: 6px 0 0; color: var(--ink-soft); font-size: 11px; }
 .history-actions { display: flex; align-items: center; gap: 10px; }
+.history-qr { display: flex; align-items: center; gap: 8px; }
+.history-qr canvas { display: block; width: 58px; height: 58px; padding: 4px; background: #fff; border: 1px solid var(--line); }
+.history-qr .btn-secondary { white-space: nowrap; }
 .status-pill { padding: 7px 9px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
 .status-pill.active { background: rgba(118,198,93,.15); color: var(--teal); }
 .status-pill.inactive { background: rgba(244,124,90,.12); color: #b25736; }
@@ -312,6 +335,7 @@ code { font-family: var(--mono); font-size: .9em; }
   .demo-actions { margin-top: 12px; }
   .limitations-list, .functions-grid, .contract-info, .info-list, .concepts-section { grid-template-columns: 1fr; }
   .storage-grid, .security-list { grid-template-columns: 1fr; }
+  .faq-grid { grid-template-columns: 1fr; }
   .examples-section { display: block; }
   .examples-section .section-title-row { margin-bottom: 15px; }
   .note-text { display: block; }
@@ -328,6 +352,8 @@ code { font-family: var(--mono); font-size: .9em; }
   .transaction-result-header { align-items: flex-start; flex-direction: column; }
   .transaction-result-grid { grid-template-columns: 1fr; }
   .details-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .history-item { align-items: flex-start; flex-direction: column; }
+  .history-actions { width: 100%; flex-wrap: wrap; }
   .detail-row { grid-template-columns: 1fr; gap: 5px; }
   .proof-tools { grid-template-columns: 1fr; justify-items: center; }
   .proof-tool-copy { width: 100%; text-align: center; }
