@@ -56,6 +56,20 @@ const main = async () => {
     path.join(__dirname, "..", "..", "proofmark-frontend", "public", "contractDeployment.json"),
     JSON.stringify(deployment, null, 2)
   );
+  const deploymentsPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "proofmark-frontend",
+    "public",
+    "deployments.json"
+  );
+  let deployments = {};
+  if (fs.existsSync(deploymentsPath)) {
+    deployments = JSON.parse(fs.readFileSync(deploymentsPath, "utf8"));
+  }
+  deployments['1337'] = deployment;
+  fs.writeFileSync(deploymentsPath, JSON.stringify(deployments, null, 2));
 
   console.log("ProofMark demo chain is ready.");
   console.log(`Contract: ${contract.address}`);
