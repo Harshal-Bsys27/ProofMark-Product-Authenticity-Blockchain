@@ -44,7 +44,7 @@ const main = async () => {
     const receipt = await deploymentTx.wait();
 
     const manufacturerAddress = process.env.MANUFACTURER_ADDRESS ||
-      "0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69";
+      (hre.network.name === "sepolia" ? deployer.address : "0x7F3faBF7D7170d6aF9C90a0821b11F0a0A10CB69");
     if (!ethers.utils.isAddress(manufacturerAddress)) {
       throw new Error(`Invalid MANUFACTURER_ADDRESS: ${manufacturerAddress}`);
     }
@@ -54,7 +54,7 @@ const main = async () => {
       await authorization.wait();
     }
 
-    if (manufacturerAddress.toLowerCase() !== deployer.address.toLowerCase()) {
+    if (hre.network.name === "localhost" && manufacturerAddress.toLowerCase() !== deployer.address.toLowerCase()) {
       const funding = await deployer.sendTransaction({
         to: manufacturerAddress,
         value: ethers.utils.parseEther("100"),
@@ -102,6 +102,20 @@ const main = async () => {
       path.join(__dirname, "..", "..", "proofmark-frontend", "public", "contractDeployment.json"),
       JSON.stringify(deploymentInfo, null, 2)
     );
+    const deploymentsPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "proofmark-frontend",
+      "public",
+      "deployments.json"
+    );
+    let deployments = {};
+    if (fs.existsSync(deploymentsPath)) {
+      deployments = JSON.parse(fs.readFileSync(deploymentsPath, "utf8"));
+    }
+    deployments[String(hre.network.config.chainId || (hre.network.name === "sepolia" ? 11155111 : 1337))] = deploymentInfo;
+    fs.writeFileSync(deploymentsPath, JSON.stringify(deployments, null, 2));
     console.log(`\n✅ Deployment info saved to: contractDeployment.json`);
     console.log("✅ Frontend contract address updated in proofmark-frontend/.env.local");
 
