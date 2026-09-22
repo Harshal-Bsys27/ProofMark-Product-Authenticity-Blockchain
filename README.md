@@ -267,6 +267,26 @@ powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "
 
 The launcher deploys the contract, authorizes and funds the manufacturer wallet, writes the current address to `proofmark-frontend/.env.local`, and starts the frontend.
 
+The launcher supports both configured networks. Sepolia is a public network, so its contract is not started locally; it is already available through the Sepolia RPC provider. The default `Both` mode refreshes the local Hardhat deployment and starts the frontend, while keeping the Sepolia deployment available when MetaMask is switched to chain `11155111`.
+
+```powershell
+# Start local Hardhat and frontend; Sepolia remains available by switching MetaMask
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Both
+
+# Start frontend for Sepolia only; do not start Hardhat
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Sepolia
+
+# Start local Hardhat and frontend only
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Local
+```
+
+After the frontend opens, select the network in MetaMask:
+
+- Hardhat Local, chain ID `1337`, for the local deployment.
+- Sepolia, chain ID `11155111`, for the public deployment.
+
+The frontend automatically selects the matching contract address from `proofmark-frontend/public/deployments.json`.
+
 `start-demo.ps1` also remembers the manufacturer wallet in `.proofmark-manufacturer` and publishes runtime deployment metadata to the frontend. This means the frontend can recover from a fresh Hardhat deployment without reusing an old contract address. Use the same launcher after every Hardhat restart; do not reuse an already-open frontend tab from the previous chain session.
 
 When MetaMask is connected, select the wallet printed by the launcher. To use a different wallet, provide it once with `-ManufacturerAddress`; that address is then remembered for future starts:
@@ -287,7 +307,7 @@ npm run node
 ```bash
 cd proofmark-contracts
 npm run deploy
-# This also authorizes/funds the default demo wallet and updates frontend/.env.local
+# Local Hardhat only: authorizes/funds the local demo wallet and updates local metadata
 ```
 
 **Terminal 3 - Start Frontend:**
@@ -307,6 +327,36 @@ Remove-Item Env:MANUFACTURER_ADDRESS
 ```
 
 Restart the frontend after deployment so React loads the updated contract address.
+
+For Sepolia, do not run `npm run deploy`; use the separate public-network command:
+
+```powershell
+cd proofmark-contracts
+npm run deploy:sepolia
+```
+
+### Use Local Hardhat and Sepolia
+
+The frontend supports both networks. It detects the active MetaMask chain and loads the matching contract from `proofmark-frontend/public/deployments.json`:
+
+- Hardhat Local: chain `1337`, fast and offline; data resets when the node stops.
+- Sepolia Testnet: chain `11155111`, public and persistent; requires free Sepolia ETH for transactions.
+
+To deploy to Sepolia, create `proofmark-contracts/.env` with a dedicated test wallet and an RPC endpoint. Never use a wallet containing real funds and never commit this file:
+
+```env
+SEPOLIA_RPC_URL=https://sepolia.provider.example/v3/YOUR_RPC_KEY
+SEPOLIA_PRIVATE_KEY=0xYOUR_TEST_WALLET_PRIVATE_KEY
+```
+
+Get Sepolia ETH from a faucet, then deploy:
+
+```powershell
+cd proofmark-contracts
+npm run deploy:sepolia
+```
+
+After deployment, switch MetaMask between Hardhat Local and Sepolia. The app updates its network label and uses the correct contract automatically. Products registered on local are separate from products registered on Sepolia.
 
 ---
 
