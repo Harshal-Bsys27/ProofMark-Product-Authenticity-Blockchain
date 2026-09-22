@@ -23,13 +23,28 @@ const CONTRACT_ABI = [
   "event ProductDeactivated(bytes32 indexed productHash, address indexed deactivatedBy, uint256 deactivationTime, uint256 blockNumber)",
 ];
 
+const NETWORKS = {
+  1337: { name: 'Hardhat Local', rpcUrl: 'http://127.0.0.1:8545' },
+  11155111: { name: 'Sepolia Testnet', rpcUrl: 'https://sepolia.infura.io/v3/' },
+};
+
+export const getActiveNetwork = async () => {
+  if (!window.ethereum) {
+    return { chainId: 1337, ...NETWORKS[1337] };
+  }
+  const chainId = Number.parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16);
+  return { chainId, ...(NETWORKS[chainId] || { name: `Chain ${chainId}`, rpcUrl: '' }) };
+};
+
 // Runtime deployment metadata prevents a stale dev-server environment from pointing at an old chain.
 const getContractAddress = async () => {
+  const { chainId, name } = await getActiveNetwork();
   try {
-    const response = await fetch(`/contractDeployment.json?ts=${Date.now()}`, { cache: 'no-store' });
+    const response = await fetch(`/deployments.json?ts=${Date.now()}`, { cache: 'no-store' });
     if (response.ok) {
-      const deployment = await response.json();
-      if (ethers.utils.isAddress(deployment.contractAddress)) {
+      const deployments = await response.json();
+      const deployment = deployments[String(chainId)] || deployments.deployments?.[String(chainId)];
+      if (deployment && ethers.utils.isAddress(deployment.contractAddress)) {
         localStorage.setItem('contractAddress', deployment.contractAddress);
         return deployment.contractAddress;
       }
@@ -38,9 +53,11 @@ const getContractAddress = async () => {
     // Fall back to the build environment when runtime metadata is unavailable.
   }
 
-  const configuredAddress = localStorage.getItem('contractAddress') || process.env.REACT_APP_CONTRACT_ADDRESS;
+  const configuredAddress = chainId === 1337
+    ? localStorage.getItem('contractAddress') || process.env.REACT_APP_CONTRACT_ADDRESS
+    : process.env[`REACT_APP_${chainId}_CONTRACT_ADDRESS`];
   if (!configuredAddress || !ethers.utils.isAddress(configuredAddress)) {
-    throw new Error('No local contract deployment found. Run start-demo.ps1 and restart Hardhat Local.');
+    throw new Error(`No ${name} contract deployment is configured. Deploy the contract to ${name} first.`);
   }
   return configuredAddress;
 };
@@ -56,7 +73,7 @@ const ensureContractCode = async (provider, contractAddress) => {
 
 const formatContractError = (error, fallback) => {
   if (error?.code === 'CALL_EXCEPTION') {
-    return 'The local deployment is out of sync with this frontend. Run start-demo.ps1, then reconnect MetaMask to Hardhat Local.';
+    return 'The selected network deployment is out of sync. Check MetaMask network and deploy the contract for that network.';
   }
   return error?.message || fallback;
 };
@@ -103,38 +120,12 @@ export const getSigner = async () => {
   return provider.getSigner();
 };
 
-const ensureLocalNetwork = async () => {
-  const targetChainId = '0x539'; // 1337
-  const currentChainId = await window.ethereum.request({
-    method: 'eth_chainId',
-  });
-
-  if (currentChainId === targetChainId) {
-    return;
+const ensureSupportedNetwork = async () => {
+  const network = await getActiveNetwork();
+  if (!NETWORKS[network.chainId]) {
+    throw new Error('Unsupported network. Select Hardhat Local (1337) or Sepolia Testnet (11155111) in MetaMask.');
   }
-
-  try {
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: targetChainId }],
-    });
-  } catch (error) {
-    if (error.code !== 4902) {
-      throw new Error(
-        `MetaMask is on chain ${parseInt(currentChainId, 16)}. Switch to Hardhat Local (chain ID 1337).`
-      );
-    }
-
-    await window.ethereum.request({
-      method: 'wallet_addEthereumChain',
-      params: [{
-        chainId: targetChainId,
-        chainName: 'Hardhat Local',
-        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-        rpcUrls: ['http://127.0.0.1:8545'],
-      }],
-    });
-  }
+  return network;
 };
 
 /**
@@ -159,12 +150,8 @@ export const registerProductOnBlockchain = async (
       throw new Error('Wallet not connected');
     }
 
-    await ensureLocalNetwork();
+    await ensureSupportedNetwork();
     const provider = getProvider();
-    const network = await provider.getNetwork();
-    if (network.chainId !== 1337) {
-      throw new Error(`MetaMask is on chain ${network.chainId}; expected local chain 1337.`);
-    }
 
     const signer = await getSigner();
     
@@ -339,7 +326,7 @@ export const deactivateProductOnBlockchain = async (productHash, account) => {
       throw new Error('Wallet not connected');
     }
 
-    await ensureLocalNetwork();
+    await ensureSupportedNetwork();
     const provider = getProvider();
     const signer = await getSigner();
     const contractAddress = await getContractAddress();
@@ -377,7 +364,7 @@ export const getTransactionDetails = async (transactionHash) => {
 
   const transaction = await provider.getTransaction(normalizedHash);
   if (!transaction) {
-    throw new Error('Transaction was not found on the connected local network.');
+    throw new Error('Transaction was not found on the connected network.');
   }
 
   const receipt = await provider.getTransactionReceipt(normalizedHash);

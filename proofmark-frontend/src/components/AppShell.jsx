@@ -10,7 +10,35 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
   const [balance, setBalance] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('proofmark-theme') === 'dark');
   const [toast, setToast] = useState('');
+  const [network, setNetwork] = useState({ name: 'Hardhat Local', chainId: 1337, rpcUrl: 'http://127.0.0.1:8545' });
   const location = useLocation();
+
+  const refreshNetwork = async () => {
+    if (!window.ethereum) return;
+    const chainId = Number.parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16);
+    const knownNetworks = {
+      1337: { name: 'Hardhat Local', rpcUrl: 'http://127.0.0.1:8545' },
+      11155111: { name: 'Sepolia Testnet', rpcUrl: 'https://sepolia.etherscan.io' },
+    };
+    setNetwork({ chainId, ...(knownNetworks[chainId] || { name: `Chain ${chainId}`, rpcUrl: '' }) });
+  };
+
+  useEffect(() => {
+    refreshNetwork();
+    if (!window.ethereum) return undefined;
+    window.ethereum.on('chainChanged', refreshNetwork);
+    return () => window.ethereum.removeListener('chainChanged', refreshNetwork);
+  }, []);
+
+  useEffect(() => {
+    if (!window.ethereum) return undefined;
+    const handleAccountsChanged = (accounts) => {
+      setAccount(accounts[0] || null);
+      setIsConnected(accounts.length > 0);
+    };
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    return () => window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+  }, [setAccount, setIsConnected]);
 
   useEffect(() => {
     document.body.classList.toggle('theme-dark', darkMode);
@@ -60,17 +88,21 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
     }
 
     try {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_requestPermissions',
+          params: [{ eth_accounts: {} }],
+        });
+      } catch (permissionError) {
+        if (permissionError.code === 4001) return;
+        // Older wallet versions may not support wallet_requestPermissions.
+      }
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       setAccount(accounts[0]);
       setIsConnected(true);
     } catch (error) {
       console.error('Wallet connection failed:', error);
     }
-  };
-
-  const disconnectWallet = () => {
-    setAccount(null);
-    setIsConnected(false);
   };
 
   return (
@@ -104,11 +136,11 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
 
         <div className="header-actions">
           <div className="header-badges">
-            <span className="network-status"><i /><span><small>NETWORK</small>Hardhat Local</span></span>
+            <span className="network-status"><i /><span><small>NETWORK</small>{network.name}</span></span>
             <span className="status-pill-inline">Demo mode</span>
           </div>
           {isConnected ? (
-            <button className="wallet-chip" type="button" onClick={disconnectWallet} title="Disconnect wallet">
+            <button className="wallet-chip" type="button" onClick={connectWallet} title="Switch MetaMask account">
               <i /><span><small>CONNECTED / {balance === null ? '--' : `${balance} ETH`}</small>{shortenAddress(account)}</span>
             </button>
           ) : (
@@ -123,8 +155,8 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
       <div className="page-context">
         <span>{location.pathname === '/' ? 'CONTROL CENTER' : location.pathname.slice(1).replace('-', ' ').toUpperCase()}</span>
         <span className="context-line" />
-        <span>LOCAL NETWORK / 1337</span>
-        <button className="context-copy" type="button" onClick={() => copyText('http://127.0.0.1:8545')} title="Copy RPC URL">COPY RPC</button>
+        <span>{network.name.toUpperCase()} / {network.chainId}</span>
+        <button className="context-copy" type="button" onClick={() => copyText(network.rpcUrl)} title="Copy network endpoint">COPY NETWORK</button>
       </div>
 
       {children}

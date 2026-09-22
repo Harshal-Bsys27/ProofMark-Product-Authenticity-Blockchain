@@ -97,7 +97,7 @@ function BlockchainDetails({ account }) {
                 <div className="info-card">
                   <h3>Chain ID</h3>
                   <p className="info-value">{blockchainInfo.chainId}</p>
-                  <small>Hardhat Local network: chain 1337</small>
+                  <small>{blockchainInfo.networkName === 'Sepolia Testnet' ? 'Public Ethereum test network: chain 11155111' : 'Local development network: chain 1337'}</small>
                 </div>
                 <div className="info-card">
                   <h3>Current Block</h3>
