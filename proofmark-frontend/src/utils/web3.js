@@ -25,12 +25,12 @@ const CONTRACT_ABI = [
 
 const NETWORKS = {
   1337: { name: 'Hardhat Local', rpcUrl: 'http://127.0.0.1:8545' },
-  11155111: { name: 'Sepolia Testnet', rpcUrl: 'https://sepolia.infura.io/v3/' },
+  11155111: { name: 'Sepolia Testnet', rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com' },
 };
 
 export const getActiveNetwork = async () => {
   if (!window.ethereum) {
-    return { chainId: 1337, ...NETWORKS[1337] };
+    return { chainId: 11155111, ...NETWORKS[11155111] };
   }
   const chainId = Number.parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16);
   return { chainId, ...(NETWORKS[chainId] || { name: `Chain ${chainId}`, rpcUrl: '' }) };
@@ -109,6 +109,17 @@ export const getProvider = () => {
     throw new Error('MetaMask is not installed');
   }
   return new ethers.providers.Web3Provider(window.ethereum);
+};
+
+export const getReadProvider = async () => {
+  const network = await getActiveNetwork();
+  if (window.ethereum) {
+    return new ethers.providers.Web3Provider(window.ethereum);
+  }
+  if (!network.rpcUrl) {
+    throw new Error('No read-only RPC endpoint is configured for the selected network.');
+  }
+  return new ethers.providers.JsonRpcProvider(network.rpcUrl, network.chainId);
 };
 
 /**
@@ -215,7 +226,7 @@ export const registerProductOnBlockchain = async (
  */
 export const verifyProductOnBlockchain = async (productHash) => {
   try {
-    const provider = getProvider();
+    const provider = await getReadProvider();
     
     // Get contract instance (read-only)
     const contractAddress = await getContractAddress();
@@ -263,7 +274,7 @@ export const verifyProductOnBlockchain = async (productHash) => {
  */
 export const getBlockchainDetails = async () => {
   try {
-    const provider = getProvider();
+    const provider = await getReadProvider();
 
     // Get network information
     const network = await provider.getNetwork();
@@ -290,7 +301,7 @@ export const getBlockchainDetails = async () => {
 
 export const getProductHistory = async () => {
   try {
-    const provider = getProvider();
+    const provider = await getReadProvider();
     const contractAddress = await getContractAddress();
     await ensureContractCode(provider, contractAddress);
     const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, provider);
@@ -355,7 +366,7 @@ export const deactivateProductOnBlockchain = async (productHash, account) => {
 };
 
 export const getTransactionDetails = async (transactionHash) => {
-  const provider = getProvider();
+  const provider = await getReadProvider();
   const normalizedHash = transactionHash.trim();
 
   if (!ethers.utils.isHexString(normalizedHash, 32)) {
@@ -492,7 +503,7 @@ export const onNetworkChange = (callback) => {
  */
 export const getCurrentNetwork = async () => {
   try {
-    const provider = getProvider();
+    const provider = await getReadProvider();
     const network = await provider.getNetwork();
 
     return {
