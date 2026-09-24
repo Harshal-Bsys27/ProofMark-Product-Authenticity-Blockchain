@@ -114,7 +114,8 @@ function RegisterProduct({ account, isConnected }) {
         });
         setProductHash(null);
       } else {
-        setMessage(`❌ Registration failed: ${result.error}`);
+        const isDuplicate = result.error?.includes('already registered');
+        setMessage(`${isDuplicate ? '⚠️' : '❌'} ${result.error}`);
       }
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
