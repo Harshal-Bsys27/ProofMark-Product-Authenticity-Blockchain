@@ -20,3 +20,4 @@ proofmark-contracts/contractDeployment.json
 npm-debug.log*
 yarn-debug.log*
 .DS_Store
+user-manual.pdf
