@@ -183,6 +183,12 @@ export const registerProductOnBlockchain = async (
       );
     }
 
+    const existingProduct = await contract.getProduct(productHash);
+    const productExists = existingProduct.exists ?? existingProduct[1];
+    if (productExists) {
+      throw new Error('This product hash is already registered on the selected network. Use different product details or verify the existing product.');
+    }
+
     // Call registerProduct function
     console.log('Registering product with hash:', productHash);
     const tx = await contract.registerProduct(
@@ -197,15 +203,20 @@ export const registerProductOnBlockchain = async (
     // Wait for transaction to be mined
     const receipt = await tx.wait();
 
+    if (receipt.status !== 1) {
+      throw new Error(`The registration transaction was mined but reverted. Transaction: ${tx.hash}`);
+    }
+
     console.log('Transaction confirmed:', receipt.blockNumber);
 
     return {
       success: true,
       details: {
-        transactionHash: receipt.transactionHash,
+        transactionHash: receipt.transactionHash || tx.hash,
         blockNumber: receipt.blockNumber,
         manufacturer: account,
-        gasUsed: receipt.gasUsed.toString(),
+        gasUsed: receipt.gasUsed ? receipt.gasUsed.toString() : '0',
+        status: 'Confirmed',
         timestamp: Math.floor(Date.now() / 1000), // Current timestamp
       }
     };
