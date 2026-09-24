@@ -80,23 +80,23 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
   }, []);
 
   const copyText = async (text) => {
-
-      const toggleFullscreen = async () => {
-        try {
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-          } else {
-            await document.documentElement.requestFullscreen();
-          }
-        } catch (error) {
-          window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Fullscreen is not available in this browser' }));
-        }
-      };
     try {
       await navigator.clipboard.writeText(text);
       window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Copied to clipboard' }));
     } catch (error) {
       console.error('Copy failed:', error);
+    }
+  };
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Fullscreen is not available in this browser' }));
     }
   };
 
