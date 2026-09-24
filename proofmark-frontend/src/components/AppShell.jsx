@@ -11,7 +11,14 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('proofmark-theme') === 'dark');
   const [toast, setToast] = useState('');
   const [network, setNetwork] = useState({ name: 'Hardhat Local', chainId: 1337, rpcUrl: 'http://127.0.0.1:8545' });
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const location = useLocation();
+
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const refreshNetwork = async () => {
     if (!window.ethereum) return;
@@ -73,6 +80,18 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
   }, []);
 
   const copyText = async (text) => {
+
+      const toggleFullscreen = async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (error) {
+          window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Fullscreen is not available in this browser' }));
+        }
+      };
     try {
       await navigator.clipboard.writeText(text);
       window.dispatchEvent(new CustomEvent('proofmark:toast', { detail: 'Copied to clipboard' }));
@@ -148,6 +167,15 @@ function AppShell({ children, account, setAccount, isConnected, setIsConnected }
           )}
           <button className="theme-toggle" type="button" onClick={() => setDarkMode(!darkMode)} title="Toggle theme" aria-label="Toggle theme">
             {darkMode ? '☼' : '◐'}
+          </button>
+          <button
+            className="fullscreen-toggle"
+            type="button"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit fullscreen' : 'Open fullscreen'}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Open fullscreen'}
+          >
+            {isFullscreen ? '×' : '⛶'}
           </button>
         </div>
       </header>
