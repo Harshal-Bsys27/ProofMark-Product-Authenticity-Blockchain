@@ -1,659 +1,374 @@
 # ProofMark: Product Authenticity Verification Using Blockchain
 
-**Blockchain Technology Mini-Project**  
-**Final-Year B.E. CSE (AIML) Student**
+A blockchain-based mini-project that helps manufacturers register authentic products and allows customers to verify product legitimacy with a transparent and tamper-resistant digital record.
 
-ProofMark records essential product identity data on an Ethereum-compatible blockchain and lets anyone verify the same details through a read-only lookup.
+## Overview
 
-## Documentation
+ProofMark is a smart-contract powered solution built to address product counterfeiting by storing product identity records on an Ethereum-compatible blockchain. Instead of relying on centralized databases or paper labels alone, the system records a unique digital fingerprint of each product and lets users verify it using a secure, hash-based process.
 
-- [Architecture and workflow](ARCHITECTURE_AND_WORKFLOW.md)
-- [Demo runbook](DEMO_RUNBOOK.md)
-- [Viva quick guide](VIVA_QUICK_GUIDE.md)
-- [Detailed startup guide](STARTUP_GUIDE.md)
+This project demonstrates real-world blockchain concepts such as immutability, access control, cryptographic hashing, wallet-based transactions, and verified product lookup. It is designed for academic presentation, live demo, and practical understanding of how blockchain can be applied to authenticity verification.
 
-## Fastest Start
+---
 
-Run this from the project root. It authorizes and funds the configured MetaMask wallet automatically:
+## Features
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
+- Manufacturer authorization and secure product registration
+- SHA-256 hashing for tamper-evident product identity
+- Blockchain-backed product verification
+- QR code generation for authentic products
+- Customer-side verification via QR scan, image upload, or manual input
+- Local Hardhat deployment and Sepolia public network support
+- MetaMask wallet integration for transaction approvals
+- Read-only verification flow without requiring gas for customer checks
+
+---
+
+## Problem Statement
+
+Counterfeit products continue to affect consumer trust, safety, and business reputation across industries such as pharmaceuticals, fashion, electronics, and food. Traditional verification methods are often vulnerable because they depend on centralized records, labels, or easily duplicated QR codes.
+
+This project addresses the question:
+
+How can product authenticity be verified in a secure, transparent, and tamper-resistant way using blockchain technology?
+
+---
+
+## Proposed Solution
+
+ProofMark uses a hybrid model of:
+
+- Solidity smart contracts for trust and validation logic
+- React frontend for user interaction
+- MetaMask for wallet-based transaction signing
+- Hardhat for local blockchain simulation and testing
+- Sepolia for public testnet deployment
+- SHA-256 hashing to check the integrity of product data
+
+The system works as follows:
+
+1. A manufacturer registers product information on the blockchain.
+2. The frontend generates a unique hash from the product details.
+3. The hash is stored together with product metadata on-chain.
+4. A customer verifies authenticity by regenerating the same hash and checking the blockchain record.
+5. If the hash matches an active product record, the product is marked authentic.
+
+---
+
+## Technology Stack
+
+| Layer | Technology | Role |
+|------|------------|------|
+| Blockchain | Solidity | Smart contract logic |
+| Local Development | Hardhat | Local blockchain, testing, deployment |
+| Public Testnet | Sepolia | Public blockchain deployment |
+| Frontend | React | Application UI |
+| Web3 Integration | ethers.js | Blockchain communication |
+| Wallet | MetaMask | Transaction signing and network connection |
+| Hashing | SHA-256 | Product fingerprint generation |
+| Build Tool | CRACO / React App | Frontend configuration and build |
+| Testing | Mocha + Chai | Smart contract validation |
+
+---
+
+## System Architecture
+
+### High-Level Architecture
+
+```mermaid
+flowchart LR
+    U[Manufacturer / Customer] --> F[React Frontend]
+    F --> M[MetaMask Wallet]
+    F --> QR[QR Code / Verification Proof]
+    M --> C[ProductAuthenticity Smart Contract]
+    F --> C
+    C --> B[Ethereum-Compatible Blockchain]
+    B --> D[Product Record / Hash / Timestamp]
+    D --> F
+    QR --> U
 ```
 
-The launcher starts Hardhat, deploys the contract, updates `proofmark-frontend/.env.local`, and starts the frontend with a funded and authorized local demo wallet. To use another wallet, pass `-ManufacturerAddress "0xYOUR_WALLET"`.
+### Layered Design
 
----
+- Frontend layer: handles product input, hashing, QR generation, verification, and result display.
+- Wallet layer: MetaMask signs write transactions and provides the active account.
+- Smart contract layer: enforces authorization rules and stores product data on-chain.
+- Blockchain layer: maintains immutable product records and transaction history.
+- Verification layer: customers compare a newly generated hash with the blockchain record without paying gas.
 
-## 📋 Table of Contents
+### Block Diagram
 
-1. [Problem Statement](#problem-statement)
-2. [Objective](#objective)
-3. [Proposed Solution](#proposed-solution)
-4. [System Architecture](#system-architecture)
-5. [Technologies Used](#technologies-used)
-6. [Blockchain Implementation](#blockchain-implementation)
-7. [Project Structure](#project-structure)
-8. [Installation](#installation)
-9. [Running the Project](#running-the-project)
-10. [How to Use](#how-to-use)
-11. [Testing](#testing)
-12. [Key Blockchain Concepts](#key-blockchain-concepts)
-13. [Limitations](#limitations)
-14. [Future Scope](#future-scope)
-15. [References](#references)
+```mermaid
+flowchart TB
+    U[Manufacturer / Customer]
+    F[React Frontend]
+    M[MetaMask Wallet]
+    C[ProductAuthenticity Smart Contract]
+    B[Ethereum-Compatible Blockchain]
+    D[Product Record / Hash / Timestamp]
+    QR[QR Code Verification Proof]
 
----
+    U --> F
+    F --> M
+    F --> QR
+    F --> C
+    M --> C
+    C --> B
+    B --> D
+    D --> F
+    QR --> U
+```
 
-## 🎯 Problem Statement
+### Registration Flow
 
-Counterfeit products cost the global economy $2+ trillion annually and threaten consumer safety.  
-**Challenge:** How can consumers verify product authenticity without trusting a centralized authority?
+```mermaid
+sequenceDiagram
+    participant M as Manufacturer
+    participant F as Frontend
+    participant W as MetaMask
+    participant C as Smart Contract
+    participant B as Blockchain
 
-**Current Limitations:**
-- ❌ Centralized databases can be hacked or tampered with
-- ❌ QR codes alone can be easily replicated
-- ❌ Supply chain lacks transparency
-- ❌ No cryptographic proof of manufacturer verification
-
----
-
-## 🚀 Objective
-
-Build a **blockchain-based product authenticity verification system** that:
-
-1. ✅ Allows manufacturers to register authentic products on an immutable ledger
-2. ✅ Uses SHA-256 cryptographic hashing for tamper-proof verification
-3. ✅ Enables customers to verify authenticity by checking blockchain records
-4. ✅ Demonstrates core blockchain concepts (immutability, smart contracts, cryptography)
-5. ✅ Integrates optional AI/OCR for automated product information extraction
-6. ✅ Works on local Ethereum-compatible blockchain (Hardhat)
-
----
-
-## 💡 Proposed Solution
-
-### Core Technology Stack
-
-**Blockchain:** Hardhat + Solidity Smart Contracts  
-**Frontend:** React + CRACO + ethers.js  
-**Wallet:** MetaMask  
-**Hashing:** SHA-256  
-**Optional AI:** Not required for the current working flow
+    M->>F: Enter product ID, name, batch
+    F->>F: Generate SHA-256 hash
+    F->>W: Request transaction approval
+    W->>C: Sign registerProduct()
+    C->>B: Store product record
+    B-->>F: Transaction receipt
+    F-->>M: Show success and QR code
+```
 
 ### Verification Flow
 
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant F as Frontend
+    participant B as Blockchain
+
+    C->>F: Scan QR / upload QR / enter data
+    F->>F: Recompute SHA-256 hash
+    F->>B: Call getProduct(hash)
+    B-->>F: Product record or not found
+    F-->>C: AUTHENTIC / NOT VERIFIED
 ```
-REGISTER: Product Data → SHA-256 Hash → Blockchain Storage
-VERIFY:   Product Data → Same SHA-256 Hash → Blockchain Lookup → Result
+
+### Main Functional Flow
+
+- Manufacturer enters product details in the frontend.
+- Product data is converted into a SHA-256 hash.
+- The hash is sent to the Solidity contract for registration.
+- The on-chain record is stored with access-control checks.
+- Customer verifies the same product using QR scan or manual input.
+- The system compares the newly generated hash with the blockchain record.
+
+---
+
+## Project Structure
+
+```text
+Product-Authenticity-Blockchain/
+├── README.md
+├── docs/
+│   ├── screenshots/
+│   ├── TEAM_PRESENTATION_SCRIPT.md
+│   └── ...
+├── ideateefi-backend-node/
+├── ideateefi-frontend-react/
+├── ideateefi-postgres-database/
+├── ideateefi-smartcontract-solidty/
+├── start-demo.ps1
+├── package.json
+├── .gitignore
+├── .env.example
+└── ...
 ```
 
 ---
 
-## 🏗️ System Architecture
-
-```
-┌──────────────────────────┐
-│    React Frontend        │
-│  (Register & Verify UI)  │
-└────────────┬─────────────┘
-             │
-      MetaMask Wallet
-      (Transaction Signing)
-             │
-┌────────────▼─────────────────────┐
-│   Hardhat Local Blockchain       │
-│  (Ethereum-compatible)           │
-│                                   │
-│  ┌──────────────────────────┐    │
-│  │ ProductAuthenticity SC   │    │
-│  │  - registerProduct()     │    │
-│  │  - getProduct()          │    │
-│  │  - deactivateProduct()   │    │
-│  └──────────────────────────┘    │
-└─────────────────────────────────┘
-```
-
----
-
-## 🛠️ Technologies Used
-
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Blockchain** | Solidity 0.8.17 | Smart contract development |
-| **Dev Environment** | Hardhat 2.14+ | Local blockchain & testing |
-| **Web3 Interaction** | ethers.js 5.7+ | Connect to blockchain |
-| **Frontend** | React 18.2+  | User interface |
-| **Build Tool** | Create React App + CRACO | Frontend development and production build |
-| **Wallet** | MetaMask | Transaction signing |
-| **UI Components** | Material-UI 5.11+ | Professional styling |
-| **Testing** | Mocha + Chai | Smart contract tests |
-| **Hashing** | SHA-256 (crypto) | Product data hashing |
-| **Optional AI** | EasyOCR | Product ID extraction |
-
----
-
-## ⛓️ Blockchain Implementation
-
-### Smart Contract: ProductAuthenticity
-
-**Features:**
-- ✅ Manufacturer authorization (access control)
-- ✅ Product registration with SHA-256 hash
-- ✅ Product verification against blockchain
-- ✅ Product deactivation capability
-- ✅ Comprehensive event emission
-- ✅ 40+ comprehensive tests
-
-**Core Functions:**
-
-```solidity
-// Register product on blockchain
-registerProduct(bytes32 hash, string productId, string name, string batch)
-
-// Read product details without a wallet or gas
-getProduct(bytes32 hash) returns (Product, bool)
-
-// Emit an on-chain verification event when called as a transaction
-verifyProduct(bytes32 hash) returns (bool, Product, string)
-
-// Get product details
-getProduct(bytes32 hash) returns (Product, bool)
-
-// Deactivate product (e.g., recall)
-deactivateProduct(bytes32 hash)
-
-// Authorize manufacturer
-authorizeManufacturer(address manufacturer)
-```
-
-### Events Emitted
-
-- `ProductRegistered` - When product is registered
-- `ProductVerified` - When product is verified
-- `ProductDeactivated` - When product is deactivated
-- `ManufacturerAuthorized` - When new manufacturer is authorized
-
-### Key Blockchain Concepts Demonstrated
-
-1. **Immutability** - Once registered, data cannot be changed
-2. **Cryptography** - SHA-256 ensures data integrity
-3. **Access Control** - Only authorized parties can perform actions
-4. **Events** - Actions are announced and logged
-5. **Decentralization** - No single central authority
-
----
-
-## 📁 Project Structure
-
-```
-product-authenticity-blockchain/
-├── contracts/
-│   └── ProductAuthenticity.sol         # Main smart contract
-├── scripts/
-│   └── deploy.js                       # Deployment script
-├── test/
-│   └── ProductAuthenticity.test.js     # 40+ comprehensive tests
-├── proofmark-frontend/
-│   ├── src/
-│   │   ├── components/                 # Reusable React components
-│   │   ├── pages/                      # 4 main pages
-│   │   ├── utils/                      # Web3 & hashing utilities
-│   │   └── App.jsx
-│   └── package.json
-├── proofmark-contracts/                # Hardhat and Solidity layer
-├── proofmark-frontend/                 # React application
-├── .env.example                        # Environment template
-├── README.md                           # This file
-├── VIVA_NOTES.md                       # Viva presentation guide
-└── .gitignore
-```
-
----
-
-## 🔧 Installation
+## Quick Start
 
 ### Prerequisites
 
-- **Node.js v16+** and **npm v7+**
-- **MetaMask browser extension**
-- **Git**
+- Node.js v16+
+- npm v7+
+- MetaMask browser extension
+- Git
 
-### Step 1: Clone Repository
+### Run the project
 
-```bash
-git clone https://github.com/Harshal-Bsys27/Product-Authenticity-Blockchain.git
-cd Product-Authenticity-Blockchain
-```
-
-### Step 2: Install Smart Contract Dependencies
-
-```bash
-cd proofmark-contracts
-npm install
-```
-
-### Step 3: Install Frontend Dependencies
-
-```bash
-cd ../proofmark-frontend
-npm install
-```
-
-### Step 4: Verify Installation
-
-```bash
-cd ../proofmark-contracts
-npm run compile
-# Should show: Compiled 1 Solidity file successfully
-```
-
----
-
-## 🚀 Running the Project
-
-### Quick Start
-
-Use the one-command launcher from the project root:
+From the project root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
 ```
 
-For a different MetaMask wallet:
+This launcher can:
+
+- start a local Hardhat node
+- deploy the contract
+- fund and authorize the demo manufacturer wallet
+- update the frontend environment values
+- launch the frontend app
+
+### Network modes
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_WALLET_ADDRESS"
-```
-
-The launcher deploys the contract, authorizes and funds the manufacturer wallet, writes the current address to `proofmark-frontend/.env.local`, and starts the frontend.
-
-The launcher supports both configured networks. Sepolia is a public network, so its contract is not started locally; it is already available through the Sepolia RPC provider. The default `Both` mode refreshes the local Hardhat deployment and starts the frontend, while keeping the Sepolia deployment available when MetaMask is switched to chain `11155111`.
-
-```powershell
-# Start local Hardhat and frontend; Sepolia remains available by switching MetaMask
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Both
-
-# Start frontend for Sepolia only; do not start Hardhat
-powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Sepolia
-
-# Start local Hardhat and frontend only
 powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Local
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -Network Sepolia
 ```
 
-After the frontend opens, select the network in MetaMask:
+Use MetaMask to switch between:
 
-- Hardhat Local, chain ID `1337`, for the local deployment.
-- Sepolia, chain ID `11155111`, for the public deployment.
-
-The frontend automatically selects the matching contract address from `proofmark-frontend/public/deployments.json`.
-
-`start-demo.ps1` also remembers the manufacturer wallet in `.proofmark-manufacturer` and publishes runtime deployment metadata to the frontend. This means the frontend can recover from a fresh Hardhat deployment without reusing an old contract address. Use the same launcher after every Hardhat restart; do not reuse an already-open frontend tab from the previous chain session.
-
-When MetaMask is connected, select the wallet printed by the launcher. To use a different wallet, provide it once with `-ManufacturerAddress`; that address is then remembered for future starts:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start-demo.ps1 -ManufacturerAddress "0xYOUR_WALLET_ADDRESS"
-```
-
-Manual setup is also available:
-
-**Terminal 1 - Start Blockchain:**
-```bash
-cd proofmark-contracts
-npm run node
-```
-
-**Terminal 2 - Deploy Contract:**
-```bash
-cd proofmark-contracts
-npm run deploy
-# Local Hardhat only: authorizes/funds the local demo wallet and updates local metadata
-```
-
-**Terminal 3 - Start Frontend:**
-```bash
-cd proofmark-frontend
-npm start
-```
-
-The frontend normally opens at `http://localhost:3000`. If that port is busy, use the URL printed by React.
-
-For a custom wallet during manual setup, use:
-
-```powershell
-$env:MANUFACTURER_ADDRESS = "0xYOUR_WALLET_ADDRESS"
-npm run authorize
-Remove-Item Env:MANUFACTURER_ADDRESS
-```
-
-Restart the frontend after deployment so React loads the updated contract address.
-
-For Sepolia, do not run `npm run deploy`; use the separate public-network command:
-
-```powershell
-cd proofmark-contracts
-npm run deploy:sepolia
-```
-
-### Use Local Hardhat and Sepolia
-
-The frontend supports both networks. It detects the active MetaMask chain and loads the matching contract from `proofmark-frontend/public/deployments.json`:
-
-- Hardhat Local: chain `1337`, fast and offline; data resets when the node stops.
-- Sepolia Testnet: chain `11155111`, public and persistent; requires free Sepolia ETH for transactions.
-
-To deploy to Sepolia, create `proofmark-contracts/.env` with a dedicated test wallet and an RPC endpoint. Never use a wallet containing real funds and never commit this file:
-
-```env
-SEPOLIA_RPC_URL=https://sepolia.provider.example/v3/YOUR_RPC_KEY
-SEPOLIA_PRIVATE_KEY=0xYOUR_TEST_WALLET_PRIVATE_KEY
-```
-
-Get Sepolia ETH from a faucet, then deploy:
-
-```powershell
-cd proofmark-contracts
-npm run deploy:sepolia
-```
-
-After deployment, switch MetaMask between Hardhat Local and Sepolia. The app updates its network label and uses the correct contract automatically. Products registered on local are separate from products registered on Sepolia.
+- Hardhat Local: Chain ID `1337`
+- Sepolia: Chain ID `11155111`
 
 ---
 
-## 📖 How to Use
+## How It Works
 
-### Register a Product (Manufacturer)
+### Manufacturer Registration
 
-1. Connect MetaMask wallet
-2. Navigate to "Register Product"
-3. Enter product details:
-   - Product ID
-   - Product Name
-   - Batch Number
-4. Click "Generate Hash" - see SHA-256 hash
-5. Click "Register on Blockchain"
-6. Approve in MetaMask
-7. ✅ See transaction hash and block number
-8. Download the generated product QR code from the successful registration panel
+1. Connect MetaMask wallet.
+2. Go to the Register Product page.
+3. Enter product details such as product ID, name, and batch number.
+4. Generate the SHA-256 hash.
+5. Submit the blockchain transaction.
+6. Confirm in MetaMask.
+7. Product gets permanently stored on-chain.
 
-### Verify a Product (Customer)
+### Customer Verification
 
-1. Go to "Verify Product"
-2. Upload a downloaded product QR image, open the camera scanner, or enter product details manually
-3. Generate the hash when using manual entry, then click "Verify"
-4. See result:
-   - ✅ AUTHENTIC - Product found on blockchain
-   - ⚠️ NOT VERIFIED - Product not found
-5. View blockchain details if authentic
-
-Verification uses the read-only `getProduct()` lookup, so QR upload, camera scanning, and manual verification do not require MetaMask or gas.
-
-### View Blockchain Details
-
-- See all transaction information
-- Manufacturer wallet address
-- Registration timestamp
-- Product hash
-- Contract address
-
-### MetaMask Network
-
-```text
-Network name: Hardhat Local
-RPC URL: http://127.0.0.1:8545
-Chain ID: 1337
-Currency: ETH
-```
+1. Open the Verify Product page.
+2. Upload the QR image, scan with camera, or enter product details manually.
+3. The app recalculates the hash.
+4. It checks the stored blockchain record.
+5. The app displays:
+   - Authentic
+   - Not Verified
 
 ---
 
-## 🧪 Testing
+## Screenshots
 
-### Run All Tests
+Add the relevant screenshots into the `docs/screenshots/` folder and update the file names below with your actual images.
 
-```bash
-cd proofmark-contracts
-npm test
-```
+### 1. Home / Landing Screen
 
-**Expected:** 40+ tests passing with gas reports
+![Home Page](docs/screenshots/home-page.png)
 
-### Test Coverage
+Caption: Home page of the ProofMark application showing the main product authenticity concept and navigation.
 
-```bash
-npm run coverage
-```
+### 2. Product Registration Page
 
-### View Gas Report
+![Register Product](docs/screenshots/register-product.png)
 
-```bash
-npm run gas-report
-```
+Caption: Manufacturer dashboard where product information is entered and registered on the blockchain.
 
-Shows gas consumption for each smart contract function
+### 3. MetaMask Transaction Confirmation
 
----
+![MetaMask Confirmation](docs/screenshots/metamask-confirmation.png)
 
-## 🎓 Key Blockchain Concepts
+Caption: MetaMask transaction approval window for securely signing the product registration request.
 
-### 1. What is Blockchain?
+### 4. QR Code Generation
 
-A **distributed ledger** - multiple computers store identical copies of transaction history. Cannot be tampered with because:
-- Changes to one computer's copy are immediately detected
-- Majority consensus required for any change
-- Cryptographic hashing links all blocks together
+![QR Code](docs/screenshots/qr-code-generation.png)
 
-### 2. Smart Contracts
+Caption: Generated QR code after successful product registration, which can be used for customer verification.
 
-Self-executing code on blockchain that:
-- Runs exactly as written
-- Cannot be stopped or changed
-- Automatically enforces business logic
-- Transparent and auditable
+### 5. Product Verification Page
 
-### 3. Cryptographic Hashing (SHA-256)
+![Verify Product](docs/screenshots/verify-product.png)
 
-Function that:
-- Converts any input to fixed 256-bit output
-- Always produces same output for same input (deterministic)
-- Cannot be reversed
-- One-bit change produces completely different hash
+Caption: Customer verification screen for scanning or uploading a QR code to validate the product.
 
-```
-Input 1:  "SKU-001Authentic"  → Hash: 0x5f8c...
-Input 2:  "SKU-002Authentic"  → Hash: 0x8a2c...
-(different inputs = different hashes)
-```
+### 6. Authentic Result
 
-### 4. Immutability
+![Authentic Product Result](docs/screenshots/authentic-result.png)
 
-Once written, blockchain data cannot be changed because:
-- New blocks reference previous block hash
-- Changing old block changes its hash
-- All subsequent blocks become invalid
-- Network consensus detects tampering
+Caption: Successful verification result where the product hash matches the blockchain record and is marked authentic.
 
-### 5. Decentralization
+### 7. Fake / Not Verified Result
 
-No single authority controls data:
-- Multiple independent nodes store data
-- Consensus required for any change
-- Transparent to all participants
-- No single point of failure
+![Not Verified Result](docs/screenshots/not-verified.png)
 
-### 6. Access Control
+Caption: Verification failure scenario showing a product that is missing or not registered on the blockchain.
 
-Smart contracts enforce permissions:
-- Only authorized addresses can register products
-- Only owner can authorize new manufacturers
-- Anyone can verify (read) products
-- Demonstrates blockchain-based authorization
-
-### 7. MetaMask & Digital Wallets
-
-Wallets:
-- Store private keys securely
-- Sign transactions with private key (proof of ownership)
-- Connect to blockchain through public key
-- Allow user to approve actions
-
-### 8. Transactions & Blocks
-
-Each action:
-- Creates transaction with unique hash
-- Is mined into a block
-- Gets block number and timestamp
-- Becomes permanent part of blockchain
+> Tip: Keep screenshots clear and uncluttered. For a project demo, use 1–2 screenshots per major stage to keep the README clean and professional.
 
 ---
 
-## ⚠️ Limitations & Important Notes
+## Smart Contract Highlights
 
-### 1. Verifies Registration, Not Physical Authenticity
+The smart contract includes core features such as:
 
-```
-✓ System can verify: "This product data is registered on blockchain"
-✗ System cannot verify: "This physical product is genuine"
-
-Why? Counterfeiters can also register fake products
-Solution: Combine with physical security features (holograms, packaging)
-```
-
-### 2. Private Key Security
-
-If manufacturer's private key is compromised:
-- Attacker can register fake products
-- Cannot be recovered
-
-**Protection:**
-- Use hardware wallets (Ledger, Trezor)
-- Multi-signature wallets
-- Secure key management practices
-
-### 3. Network Assumptions
-
-Assumes blockchain network is secure:
-- Ethereum: Billions in security infrastructure
-- 51% attack cost: Tens of billions of dollars
-- Safe for this project's purposes
-
-### 4. Off-Chain Data Trust
-
-Product hash is computed off-chain (frontend). Requires:
-- Frontend code is trustworthy
-- Same hashing algorithm for register and verify
-- User enters same product data both times
-
-### 5. Scalability
-
-Current contract stores all products on-chain:
-- Fine for mini-project
-- Production uses: Layer 2, sidechains, sharding
-- Gas costs increase with data size
-
-### 6. Privacy
-
-All on-chain data is public:
-- Anyone can see all products registered
-- Manufacturer addresses visible
-- Solution: Zero-knowledge proofs, privacy chains
+- authorized manufacturer access
+- product registration with hash verification
+- product lookup without wallet interaction
+- deactivation support for unsafe or recalled products
+- immutable on-chain record storage
 
 ---
 
-## 🔮 Future Scope
+## Key Blockchain Concepts Demonstrated
 
-1. **Supply Chain Tracking** - Track product journey from manufacturer to customer
-2. **Mobile App** - React Native/Flutter with QR scanner
-3. **Multi-Signature** - Multiple parties must approve registration
-4. **NFT Integration** - Mint NFT for each product
-5. **Cross-Chain** - Deploy to Polygon, Arbitrum for lower fees
-6. **DAO Governance** - Manufacturers vote on system changes
-7. **Automated Recalls** - Mass deactivate batches
-8. **Advanced AI** - Computer vision for product verification
-9. **Compliance** - Integrate with EU tracking regulations
-10. **Analytics Dashboard** - Statistics and reporting
+- Immutability
+- Hashing
+- Access control
+- Smart contracts
+- Wallet-based transactions
+- Distributed verification
 
 ---
 
-## 📚 References
+## Limitations
 
-### Documentation
-
-- Ethereum Docs: https://ethereum.org/en/developers/docs/
-- Solidity: https://docs.soliditylang.org/
-- Hardhat: https://hardhat.org/docs
-- ethers.js: https://docs.ethers.org/v5/
-- MetaMask: https://docs.metamask.io/
-
-### Learning
-
-- CryptoZombies: https://cryptozombies.io/
-- OpenZeppelin Contracts: https://docs.openzeppelin.com/
-- Ethereum Whitepaper: https://ethereum.org/en/whitepaper/
-
-### Original Project Reference
-
-This project was adapted from existing anti-counterfeit blockchain implementations and simplified for educational purposes. Focus shifted from complex supply chain tracking to core blockchain concepts suitable for academic mini-projects.
+- Blockchain verifies the registered product record, not the physical item itself.
+- Product integrity still depends on the trustworthiness of product data entered by the manufacturer.
+- Public chain transactions require network fees and wallet connectivity.
+- If the manufacturer private key is compromised, fake products could be registered.
 
 ---
 
-## 📄 Important Academic Notes
+## Future Scope
 
-### For Your Viva Presentation
-
-Be prepared to explain:
-1. ✅ Why blockchain solves the counterfeit problem
-2. ✅ How smart contracts work
-3. ✅ What SHA-256 hashing provides
-4. ✅ How immutability works
-5. ✅ Limitations and realistic use cases
-6. ✅ Difference between decentralized and centralized systems
-7. ✅ Role of MetaMask and digital wallets
-8. ✅ How your project demonstrates blockchain concepts
-
-### Key Talking Points
-
-- **Core Technology:** Smart contracts store and verify product data immutably
-- **Verification Method:** Deterministic SHA-256 hashing ensures data integrity
-- **Innovation:** Combines blockchain immutability with cryptographic hashing
-- **Practical Value:** Provides transparent, tamper-proof product registration
-- **Limitations:** Honest about what blockchain can and cannot verify
-
-See **VIVA_NOTES.md** for detailed viva preparation.
+- Supply chain tracking integration
+- Mobile app support
+- Multi-signature approval workflow
+- NFT-based product identity
+- Cross-chain deployment
+- Smart recall and product deactivation dashboard
 
 ---
 
-## 🎓 Learning Outcomes
+## Documentation
 
-After completing this project, you understand:
-
-- ⭐ How smart contracts enable trustless verification
-- ⭐ Cryptographic hashing for data integrity
-- ⭐ Blockchain immutability and security
-- ⭐ Access control and permissions on blockchain
-- ⭐ Transaction structure and block generation
-- ⭐ Event-driven architecture in smart contracts
-- ⭐ Front-end blockchain interaction with ethers.js
-- ⭐ Smart contract testing strategies
-- ⭐ Gas optimization and cost analysis
+- Architecture and workflow
+- Demo runbook
+- Viva quick guide
+- Startup guide
 
 ---
 
-## ✅ Project Success Checklist
+## Team
 
-- [ ] Hardhat blockchain runs without errors
-- [ ] Smart contract compiles successfully
-- [ ] All 40+ tests pass
-- [ ] Contract deploys with clear console output
-- [ ] Frontend connects to MetaMask
-- [ ] Can register product and get transaction hash
-- [ ] Can verify product and see result
-- [ ] Blockchain details display correctly
-- [ ] Can explain each component in detail
-- [ ] Ready to demonstrate in viva
+- Harshal
+- Hardik
+- Jeet
+- Kavya
 
 ---
 
-**Status:** ✅ Complete and Academic-Ready  
-**Last Updated:** September 2024  
-**For:** Blockchain Technology Mini-Project Viva
+## Project Status
+
+Status: Completed and demo-ready
+
+This project is suitable for final-year academic demonstration, viva presentation, and blockchain-based product authenticity proof-of-concept work.
+
+---
+
+## License
+
+This project is intended for educational and academic demonstration purposes.
+
