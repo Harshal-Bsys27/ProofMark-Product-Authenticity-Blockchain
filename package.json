@@ -1,0 +1,8 @@
+{
+  "name": "proofmark-project",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix proofmark-frontend install && npm --prefix proofmark-frontend run build",
+    "start": "npm --prefix proofmark-frontend start"
+  }
+}
