@@ -29,6 +29,8 @@ function RegisterProduct({ account, isConnected }) {
   const [history, setHistory] = useState([]);
   const [message, setMessage] = useState('');
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const [selectedLedgerEntry, setSelectedLedgerEntry] = useState(null);
+  const [hiddenProductHashes, setHiddenProductHashes] = useState([]);
 
   useEffect(() => {
     const refreshHistory = async () => {
@@ -158,6 +160,16 @@ function RegisterProduct({ account, isConnected }) {
       setMessage(`❌ Deactivation failed: ${result.error}`);
     }
     setLoading(false);
+  };
+
+  const visibleHistory = history
+    .filter((entry) => !hiddenProductHashes.includes(entry.hash))
+    .sort((a, b) => Number(b.isActive) - Number(a.isActive) || Number(b.registrationTime) - Number(a.registrationTime));
+
+  const handleDeleteProductFromDashboard = (hash) => {
+    setHiddenProductHashes((previous) => [...new Set([...previous, hash])]);
+    setSelectedLedgerEntry(null);
+    setMessage('✅ Product removed from dashboard view.');
   };
 
   return (
@@ -333,12 +345,35 @@ function RegisterProduct({ account, isConnected }) {
           <section className="history-panel">
             <div className="section-title-row"><span className="info-kicker">MANUFACTURER VIEW</span><h2>Registered product ledger</h2></div>
             <div className="history-list">
-              {history.map((entry) => (
-                <div className="history-item" key={entry.hash}>
-                  <div>
-                    <strong>{entry.productName}</strong>
-                    <p>{entry.productId} • {entry.batchNumber}</p>
-                    <small>{entry.hash.slice(0, 12)}...{entry.hash.slice(-8)} • {new Date(entry.registrationTime * 1000).toLocaleDateString()}</small>
+              {visibleHistory.map((entry, index) => (
+                <div
+                  className="history-item"
+                  key={entry.hash}
+                  onClick={() => setSelectedLedgerEntry(entry)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelectedLedgerEntry(entry);
+                    }
+                  }}
+                >
+                  <div className="history-main">
+                    <span className="serial-number">Sr. {index + 1}</span>
+                    <div className="product-identity-block">
+                      <strong className="product-name-display">{entry.productName}</strong>
+                      <div className="product-meta-line">
+                        <span>{entry.productId}</span>
+                        <span className="meta-separator">•</span>
+                        <span>{entry.batchNumber}</span>
+                      </div>
+                      <small className="product-hash-line">
+                        {entry.hash.slice(0, 12)}...{entry.hash.slice(-8)}
+                        <span className="meta-separator">•</span>
+                        {new Date(entry.registrationTime * 1000).toLocaleDateString()}
+                      </small>
+                    </div>
                   </div>
                   <div className="history-actions">
                     <div className="history-qr">
@@ -352,21 +387,133 @@ function RegisterProduct({ account, isConnected }) {
                       <button
                         className="btn-secondary small"
                         type="button"
-                        onClick={() => downloadHistoryQrCode(entry)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          downloadHistoryQrCode(entry);
+                        }}
                         title={`Download QR for ${entry.productId}`}
                       >
                         ↓ QR
                       </button>
                     </div>
                     <span className={`status-pill ${entry.isActive ? 'active' : 'inactive'}`}>{entry.isActive ? 'Active' : 'Inactive'}</span>
+                    <button
+                      className="btn-secondary small"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedLedgerEntry(entry);
+                      }}
+                    >
+                      Details
+                    </button>
                     {entry.isActive && (
-                      <button className="btn-secondary small" type="button" onClick={() => handleDeactivateProduct(entry.hash)}>Deactivate</button>
+                      <button
+                        className="btn-secondary small"
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeactivateProduct(entry.hash);
+                        }}
+                      >
+                        Deactivate
+                      </button>
                     )}
+                    <button
+                      className="btn-secondary small"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteProductFromDashboard(entry.hash);
+                      }}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </section>
+        )}
+
+        {selectedLedgerEntry && (
+          <div className="product-modal-backdrop" onClick={() => setSelectedLedgerEntry(null)}>
+            <div className="product-modal" onClick={(event) => event.stopPropagation()}>
+              <div className="product-modal-header">
+                <div>
+                  <span className="info-kicker">PRODUCT DETAILS</span>
+                  <h3>{selectedLedgerEntry.productName}</h3>
+                </div>
+                <button className="mini-close-button" type="button" onClick={() => setSelectedLedgerEntry(null)}>×</button>
+              </div>
+
+              <div className="product-modal-body">
+                <div className="product-modal-qr">
+                  <QRCodeCanvas
+                    value={`${window.location.origin}/verify?hash=${selectedLedgerEntry.hash}`}
+                    size={160}
+                    bgColor="#ffffff"
+                    fgColor="#0a3d3b"
+                  />
+                </div>
+
+                <div className="product-modal-info">
+                  <div className="detail-row">
+                    <span className="detail-label">Product ID</span>
+                    <span className="detail-value">{selectedLedgerEntry.productId}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Batch</span>
+                    <span className="detail-value">{selectedLedgerEntry.batchNumber}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Manufacturer</span>
+                    <span className="detail-value">{selectedLedgerEntry.manufacturer}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Status</span>
+                    <span className={`status-pill ${selectedLedgerEntry.isActive ? 'active' : 'inactive'}`}>
+                      {selectedLedgerEntry.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Registration Time</span>
+                    <span className="detail-value">{new Date(selectedLedgerEntry.registrationTime * 1000).toLocaleString()}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Full Hash</span>
+                    <code className="detail-value">{selectedLedgerEntry.hash}</code>
+                  </div>
+                  {selectedLedgerEntry.isActive && (
+                    <div className="detail-row">
+                      <span className="detail-label">Action</span>
+                      <div className="copy-value-row" style={{ gap: '8px' }}>
+                        <button
+                          className="btn-secondary small"
+                          type="button"
+                          onClick={() => {
+                            handleDeactivateProduct(selectedLedgerEntry.hash);
+                            setSelectedLedgerEntry(null);
+                          }}
+                        >
+                          Deactivate Product
+                        </button>
+                        <button
+                          className="btn-secondary small"
+                          type="button"
+                          onClick={() => {
+                            handleDeleteProductFromDashboard(selectedLedgerEntry.hash);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* How It Works */}

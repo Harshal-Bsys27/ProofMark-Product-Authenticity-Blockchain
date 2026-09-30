@@ -81,7 +81,8 @@
 
 .page-container { padding: 42px 0 0; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; padding: 34px 0 25px; border-bottom: 1px solid var(--ink); text-align: left; }
-.page-header h1 { margin: 0; color: var(--ink); font-size: clamp(2.4rem, 5vw, 4.8rem); line-height: .95; letter-spacing: -.08em; }
+.page-header h1 { display: inline-flex; align-items: center; gap: 12px; margin: 0; color: var(--ink); font-size: clamp(2.4rem, 5vw, 4.8rem); line-height: .95; letter-spacing: -.08em; white-space: nowrap; }
+.page-header-mark { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
 .page-header .subtitle { max-width: 350px; margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
 .page-header .account-info, .page-header .no-wallet-note { margin: 0; padding: 10px 12px; background: var(--white); color: var(--teal); font-family: var(--mono); font-size: 10px; }
 .page-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .65fr); align-items: start; gap: 22px; padding-top: 28px; }
@@ -201,27 +202,27 @@ code { font-family: var(--mono); font-size: .9em; }
 .blockchain-page .info-section, .blockchain-page .concepts-section, .blockchain-page .search-section, .blockchain-page .action-section { width: 100%; }
 .blockchain-page .info-section { padding: 28px; background: var(--white); border: 1px solid var(--line); }
 .blockchain-page .info-section h2, .blockchain-page .concepts-section h2, .blockchain-page .search-section h2 { display: flex; align-items: center; gap: 10px; }
-.info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.info-card { min-height: 125px; padding: 17px; background: var(--paper); border: 1px solid var(--line); }
-.info-card h3 { margin: 0 0 15px; color: var(--ink-soft); font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
-.info-card .info-value { margin: 0 0 9px; color: var(--teal); font-family: var(--mono); font-size: 20px; word-break: break-word; }
-.info-card small { color: #89948d; font-size: 10px; line-height: 1.45; }
-.contract-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 30px; border-top: 1px solid var(--line); }
-.info-row { display: grid; grid-template-columns: 145px 1fr; gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
-.info-label { color: var(--ink-soft); font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
-.info-row .info-value { min-width: 0; color: var(--ink); word-break: break-all; }
-.functions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.function-card { padding: 19px; background: var(--paper); border: 1px solid var(--line); }
-.function-card h3 { margin: 0 0 10px; color: var(--teal); font-family: var(--mono); font-size: 13px; }
-.function-description, .function-params { color: var(--ink-soft); font-size: 12px; line-height: 1.55; }
-.function-type { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-family: var(--mono); font-size: 9px; }
-.type-badge { padding: 4px 6px; background: #ffe0d8; color: #8b301c; }
+.info-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.info-card { min-height: 140px; padding: 20px; background: var(--paper); border: 1px solid var(--line); }
+.info-card h3 { margin: 0 0 15px; color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.info-card .info-value { margin: 0 0 9px; color: var(--teal); font-family: var(--mono); font-size: clamp(1.4rem, 2vw, 2.2rem); word-break: break-word; }
+.info-card small { color: #89948d; font-size: 12px; line-height: 1.5; }
+.contract-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 30px; border-top: 1px solid var(--line); }
+.info-row { display: grid; grid-template-columns: 170px 1fr; gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.info-label { color: var(--ink-soft); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
+.info-row .info-value { min-width: 0; color: var(--ink); word-break: break-all; font-size: 14px; }
+.functions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.function-card { padding: 22px; background: var(--paper); border: 1px solid var(--line); }
+.function-card h3 { margin: 0 0 10px; color: var(--teal); font-family: var(--mono); font-size: 16px; }
+.function-description, .function-params { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+.function-type { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-family: var(--mono); font-size: 10px; }
+.type-badge { padding: 4px 6px; background: #ffe0d8; color: #8b301c; font-size: 10px; }
 .type-badge.read-only { background: var(--mint); color: var(--teal-dark); }
-.function-params strong { color: var(--ink); font-family: var(--mono); font-size: 9px; }
-.transaction-info h3 { margin: 0 0 14px; font-size: 15px; }
-.info-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 30px; margin: 0; padding: 0; list-style: none; counter-reset: transaction; }
-.info-list li { counter-increment: transaction; position: relative; padding: 12px 0 12px 27px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 11px; line-height: 1.55; }
-.info-list li::before { content: '0' counter(transaction); position: absolute; left: 0; color: var(--coral); font-family: var(--mono); font-size: 9px; }
+.function-params strong { color: var(--ink); font-family: var(--mono); font-size: 10px; }
+.transaction-info h3 { margin: 0 0 14px; font-size: 18px; }
+.info-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 30px; margin: 0; padding: 0; list-style: none; counter-reset: transaction; }
+.info-list li { counter-increment: transaction; position: relative; padding: 12px 0 12px 27px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
+.info-list li::before { content: '0' counter(transaction); position: absolute; left: 0; color: var(--coral); font-family: var(--mono); font-size: 10px; }
 .info-list strong { color: var(--ink); }
 .search-section { padding: 25px; background: var(--teal-dark); color: var(--white); }
 .search-section h2 { color: var(--mint); }
@@ -289,17 +290,35 @@ code { font-family: var(--mono); font-size: .9em; }
 .security-list p { margin: 0; color: var(--ink-soft); font-size: 11px; line-height: 1.55; }
 .history-panel { margin-top: 24px; padding: 24px; background: var(--white); border: 1px solid var(--line); }
 .history-list { display: grid; gap: 12px; }
-.history-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); }
-.history-item strong { display: block; font-size: 14px; }
-.history-item p, .history-item small { margin: 6px 0 0; color: var(--ink-soft); font-size: 11px; }
-.history-actions { display: flex; align-items: center; gap: 10px; }
+.history-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 0 rgba(11, 18, 26, 0.02); }
+.history-main { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
+.product-identity-block { display: grid; gap: 6px; min-width: 0; }
+.serial-number { display: inline-flex; min-width: 52px; justify-content: center; padding: 6px 8px; background: var(--teal-dark); color: var(--white); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.product-name-display { display: block; color: var(--ink); font-size: 20px; line-height: 1.2; letter-spacing: -.04em; }
+.product-meta-line, .product-hash-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--ink-soft); font-size: 12px; line-height: 1.4; }
+.product-hash-line { font-family: var(--mono); font-size: 11px; }
+.meta-separator { color: #9ca7a1; }
+.history-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .history-qr { display: flex; align-items: center; gap: 8px; }
 .history-qr canvas { display: block; width: 58px; height: 58px; padding: 4px; background: #fff; border: 1px solid var(--line); }
 .history-qr .btn-secondary { white-space: nowrap; }
 .status-pill { padding: 7px 9px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
 .status-pill.active { background: rgba(118,198,93,.15); color: var(--teal); }
 .status-pill.inactive { background: rgba(244,124,90,.12); color: #b25736; }
-.btn-secondary.small { padding: 8px 10px; min-width: 0; }
+.btn-secondary.small { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 10px; min-width: 0; line-height: 1.2; text-align: center; white-space: normal; }
+.copy-value-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.copy-value-row .btn-secondary.small { margin-top: 0; }
+.product-modal-backdrop { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(11, 18, 26, 0.5); z-index: 1000; padding: 20px; }
+.product-modal { width: min(760px, 100%); background: var(--white); border: 1px solid var(--line); box-shadow: 0 28px 60px rgba(11, 18, 26, 0.18); }
+.product-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+.product-modal-header h3 { margin: 8px 0 0; font-size: 24px; letter-spacing: -.05em; }
+.mini-close-button { width: 36px; height: 36px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; font-size: 20px; }
+.product-modal-body { display: grid; grid-template-columns: 180px 1fr; gap: 18px; padding: 22px; }
+.product-modal-qr { display: grid; place-items: center; padding: 16px; border: 1px solid var(--line); background: var(--paper); }
+.product-modal-info { display: grid; gap: 10px; }
+.product-modal-info .detail-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.product-modal-info .detail-label { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.product-modal-info .detail-value { word-break: break-word; }
 
 @media (max-width: 800px) {
   .home-page, .page-container { width: min(100% - 32px, 620px); }

@@ -259,7 +259,7 @@ function VerifyProduct({ account }) {
     <div className="page-container">
       {/* Header */}
       <header className="page-header">
-        <h1>✓ Verify Product</h1>
+        <h1><span className="page-header-mark" aria-hidden="true">✓</span> Verify Product</h1>
         <p className="subtitle">Check if a product is authentic by verifying it on the blockchain</p>
         <p className="no-wallet-note">
           💡 <strong>No wallet connection needed</strong> - Verification is a free read operation on blockchain
