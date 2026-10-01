@@ -21,4 +21,5 @@ npm-debug.log*
 yarn-debug.log*
 .DS_Store
 user-manual.pdf
-docs\BLOCKCHAIN_LAB_MINI_PROJECT_REPORT.md
+docs/BLOCKCHAIN_LAB_MINI_PROJECT_REPORT.md
+docs/TEAM_PRESENTATION_SCRIPT.md
