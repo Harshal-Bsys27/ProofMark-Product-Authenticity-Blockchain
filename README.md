@@ -251,51 +251,55 @@ Use MetaMask to switch between:
 
 ## Screenshots
 
-Add the relevant screenshots into the `docs/screenshots/` folder and update the file names below with your actual images.
+### Figure 1: ProofMark overview dashboard
 
-### 1. Home / Landing Screen
+![Home Page](docs/screenshots/Home_Page.jpeg)  
+**Explanation:** Shows the ProofMark identity, navigation, network status, wallet state, live blockchain summary, and entry points for registration and verification. The active network indicator displays Hardhat Local or Sepolia according to MetaMask.
 
-![Home Page](docs/screenshots/home-page.png)
+### Figure 2: Manufacturer registration form
 
-Caption: Home page of the ProofMark application showing the main product authenticity concept and navigation.
+![Home Page](docs/screenshots/Registration_form.jpeg)
+**Explanation:** The manufacturer enters product ID, product name, and batch number. The form is connected to the selected wallet and validates the required data before hashing.
 
-### 2. Product Registration Page
+### Figure 3: Generated SHA-256 hash
 
-![Register Product](docs/screenshots/register-product.png)
+![Home Page](docs/screenshots/Generated_SHA-256_hash.jpeg)
+**Explanation:** The hash is the deterministic fingerprint of the combined product fields. It is displayed before transaction submission so the manufacturer can understand what will be stored.
 
-Caption: Manufacturer dashboard where product information is entered and registered on the blockchain.
+### Figure 4: MetaMask registration confirmation
 
-### 3. MetaMask Transaction Confirmation
+![Home Page](docs/screenshots/MetaMask.jpeg)
+**Explanation:** MetaMask shows the write transaction that will call `registerProduct()`. The private key remains inside the wallet and the application receives only the signed transaction result.
 
-![MetaMask Confirmation](docs/screenshots/metamask-confirmation.png)
+### Figure 5: Successful registration and QR proof
 
-Caption: MetaMask transaction approval window for securely signing the product registration request.
+![Home Page](docs/screenshots/QR_proof.jpeg)
+**Explanation:** The transaction receipt confirms that the record was mined. The QR code contains a verifier URL with the product hash and can be downloaded for a product label or presentation.
 
-### 4. QR Code Generation
+### Figure 6: Registered product ledger
 
-![QR Code](docs/screenshots/qr-code-generation.png)
+![Home Page](docs/screenshots/Registered_product_ledger.jpeg) 
+**Explanation:** The ledger reads registered records from the contract and provides product-level management actions. QR access remains available for both active and inactive records.
 
-Caption: Generated QR code after successful product registration, which can be used for customer verification.
+### Figure 7: QR upload processing
 
-### 5. Product Verification Page
+![Home Page](docs/screenshots/QR_upload_processing.jpeg)
+**Explanation:** The verification interface displays processing stages before showing the final response. This makes the QR decoding and blockchain lookup understandable to the user.
 
-![Verify Product](docs/screenshots/verify-product.png)
+### Figure 8: Authentic verification result
 
-Caption: Customer verification screen for scanning or uploading a QR code to validate the product.
+![Home Page](docs/screenshots/Authentic_verification_result.jpeg) 
+**Explanation:** The product hash matched an active record returned by the read-only `getProduct()` lookup.
 
-### 6. Authentic Result
+### Figure 9: Blockchain Ledger page
 
-![Authentic Product Result](docs/screenshots/authentic-result.png)
+![Home Page](docs/screenshots/Blockchain_Ledger_page.jpeg)
+**Explanation:** Displays network information, contract address, current block, gas price, contract functions, transaction search, blockchain concepts, and FAQ content. The page works in both themes and adapts to the active network.
 
-Caption: Successful verification result where the product hash matches the blockchain record and is marked authentic.
+### Figure 10: Sepolia deployment
 
-### 7. Fake / Not Verified Result
-
-![Not Verified Result](docs/screenshots/not-verified.png)
-
-Caption: Verification failure scenario showing a product that is missing or not registered on the blockchain.
-
-> Tip: Keep screenshots clear and uncluttered. For a project demo, use 1–2 screenshots per major stage to keep the README clean and professional.
+![Home Page](docs/screenshots/Sepolia_deployment.jpeg)
+**Explanation:** Demonstrates that the same frontend can select the Sepolia contract using the deployment entry for chain `11155111`.
 
 ---
 
