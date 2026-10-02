@@ -254,51 +254,61 @@ Use MetaMask to switch between:
 ### Figure 1: ProofMark overview dashboard
 
 ![Home Page](docs/screenshots/Home_Page.jpeg)  
+
 **Explanation:** Shows the ProofMark identity, navigation, network status, wallet state, live blockchain summary, and entry points for registration and verification. The active network indicator displays Hardhat Local or Sepolia according to MetaMask.
 
 ### Figure 2: Manufacturer registration form
 
 ![Home Page](docs/screenshots/Registration_form.jpeg)
+
 **Explanation:** The manufacturer enters product ID, product name, and batch number. The form is connected to the selected wallet and validates the required data before hashing.
 
 ### Figure 3: Generated SHA-256 hash
 
 ![Home Page](docs/screenshots/Generated_SHA-256_hash.jpeg)
+
 **Explanation:** The hash is the deterministic fingerprint of the combined product fields. It is displayed before transaction submission so the manufacturer can understand what will be stored.
 
 ### Figure 4: MetaMask registration confirmation
 
 ![Home Page](docs/screenshots/MetaMask.jpeg)
+
 **Explanation:** MetaMask shows the write transaction that will call `registerProduct()`. The private key remains inside the wallet and the application receives only the signed transaction result.
 
 ### Figure 5: Successful registration and QR proof
 
 ![Home Page](docs/screenshots/QR_proof.jpeg)
+
 **Explanation:** The transaction receipt confirms that the record was mined. The QR code contains a verifier URL with the product hash and can be downloaded for a product label or presentation.
 
 ### Figure 6: Registered product ledger
 
 ![Home Page](docs/screenshots/Registered_product_ledger.jpeg) 
+
 **Explanation:** The ledger reads registered records from the contract and provides product-level management actions. QR access remains available for both active and inactive records.
 
 ### Figure 7: QR upload processing
 
 ![Home Page](docs/screenshots/QR_upload_processing.jpeg)
+
 **Explanation:** The verification interface displays processing stages before showing the final response. This makes the QR decoding and blockchain lookup understandable to the user.
 
 ### Figure 8: Authentic verification result
 
 ![Home Page](docs/screenshots/Authentic_verification_result.jpeg) 
+
 **Explanation:** The product hash matched an active record returned by the read-only `getProduct()` lookup.
 
 ### Figure 9: Blockchain Ledger page
 
 ![Home Page](docs/screenshots/Blockchain_Ledger_page.jpeg)
+
 **Explanation:** Displays network information, contract address, current block, gas price, contract functions, transaction search, blockchain concepts, and FAQ content. The page works in both themes and adapts to the active network.
 
 ### Figure 10: Sepolia deployment
 
 ![Home Page](docs/screenshots/Sepolia_deployment.jpeg)
+
 **Explanation:** Demonstrates that the same frontend can select the Sepolia contract using the deployment entry for chain `11155111`.
 
 ---
